@@ -11,6 +11,8 @@
 
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -22,6 +24,8 @@
             --danger-hover: #dc2626;
             --info: #3b82f6;
             --info-hover: #2563eb;
+            --excel: #16a34a;
+            --excel-hover: #15803d;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -134,6 +138,12 @@
         .btn-danger:hover {
             background-color: var(--danger-hover);
         }
+        .btn-excel {
+            background-color: var(--excel);
+        }
+        .btn-excel:hover {
+            background-color: var(--excel-hover);
+        }
         .output-section {
             display: flex;
             flex-direction: column;
@@ -244,4 +254,432 @@
             </div>
 
             <div class="form-row" style="flex-wrap: wrap;">
-                <div class="form-group"><label>Pilot Time Total</label>
+                <div class="form-group"><label>Pilot Time Total</label><input type="text" id="pilotTime" placeholder="Auto"></div>
+                <div class="form-group"><label>Timesheet Total</label><input type="text" id="timesheetTotal" placeholder="Auto"></div>
+                <div class="form-group"><label>Standby Total</label><input type="text" id="standbyTotal" placeholder="Auto"></div>
+            </div>
+            
+            <div class="form-group"><label>Notes</label><textarea id="notes" rows="3"></textarea></div>
+
+            <div class="button-group">
+                <button type="button" class="btn-danger" onclick="clearForm()">Clear Form</button>
+                <button type="button" onclick="generateSheet()">Generate Jobsheet</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <div class="output-wrapper" id="outputWrapper">
+                <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
+            </div>
+            <div class="button-group">
+                <button id="copyBtn" onclick="copyToClipboard()">Copy to Clipboard</button>
+                <button class="btn-excel" onclick="exportToExcel()">Export to Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function initAddy() {
+            var startLookup = new AddyComplete(document.getElementById("startAddr"));
+            startLookup.options.excludePostBox = false;
+
+            var endLookup = new AddyComplete(document.getElementById("endAddr"));
+            endLookup.options.excludePostBox = false;
+
+            startLookup.on("selection", (data) => {
+                if (data && data.address) {
+                    let fullParts = [data.address.address1];
+                    if (data.address.address2) fullParts.push(data.address.address2);
+                    if (data.address.city) fullParts.push(data.address.city);
+                    if (data.address.postcode) fullParts.push(data.address.postcode);
+                    
+                    document.getElementById("startAddr").value = fullParts.join(", ");
+                }
+                saveInputs(); 
+                showSaveIndicator(); 
+            });
+
+            endLookup.on("selection", (data) => {
+                if (data && data.address) {
+                    let fullParts = [data.address.address1];
+                    if (data.address.address2) fullParts.push(data.address.address2);
+                    if (data.address.city) fullParts.push(data.address.city);
+                    if (data.address.postcode) fullParts.push(data.address.postcode);
+                    
+                    document.getElementById("endAddr").value = fullParts.join(", ");
+                }
+                saveInputs(); 
+                showSaveIndicator(); 
+            });
+        }
+    </script>
+
+    <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
+
+    <script>
+        let saveTimeout;
+
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
+        window.onload = function() {
+            loadInputs();
+            if (!document.getElementById('uniqueId').value) {
+                generateRandomId();
+            }
+
+            const allInputs = document.querySelectorAll('input, textarea');
+            allInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    saveInputs();
+                    showSaveIndicator();
+                });
+            });
+        };
+
+        document.getElementById("startAddr").addEventListener("change", saveInputs);
+        document.getElementById("endAddr").addEventListener("change", saveInputs);
+
+        function saveInputs() {
+            const data = {};
+            document.querySelectorAll('input, textarea').forEach(input => {
+                data[input.id] = input.value;
+            });
+            localStorage.setItem('gps_jobsheet_data', JSON.stringify(data));
+        }
+
+        function loadInputs() {
+            const savedData = localStorage.getItem('gps_jobsheet_data');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (const id in data) {
+                    const el = document.getElementById(id);
+                    if (el) { el.value = data[id]; }
+                }
+            }
+        }
+
+        function valKm(id) {
+            const v = document.getElementById(id).value;
+            return v ? `${v} KM` : '';
+        }
+
+        function clearForm() {
+            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+                localStorage.removeItem('gps_jobsheet_data');
+                document.querySelectorAll('input, textarea').forEach(input => {
+                    input.value = '';
+                });
+                generateRandomId();
+                document.getElementById('output').textContent = 'Fill out the form and click "Generate Jobsheet" to see the output here.';
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.opacity = '1';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { indicator.style.opacity = '0'; }, 1500);
+        }
+
+        function generateRandomId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let id = 'GPS-';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('uniqueId').value = id;
+        }
+
+        function roundInputTime(id) {
+            const input = document.getElementById(id);
+            if (!input || !input.value) return;
+            
+            const v = input.value;
+            const isDateTime = v.includes('T');
+            
+            if (isDateTime) {
+                const dateObj = new Date(v);
+                const minutes = dateObj.getMinutes();
+                const roundedMinutes = Math.round(minutes / 15) * 15;
+                dateObj.setMinutes(roundedMinutes);
+                
+                const yyyy = dateObj.getFullYear();
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                const hh = String(dateObj.getHours()).padStart(2, '0');
+                const min = String(dateObj.getMinutes()).padStart(2, '0');
+                input.value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            } else {
+                const [hours, minutes] = v.split(':').map(Number);
+                let roundedMinutes = Math.round(minutes / 15) * 15;
+                let newHours = hours;
+                
+                if (roundedMinutes === 60) {
+                    roundedMinutes = 0;
+                    newHours += 1;
+                }
+                if (newHours >= 24) newHours = 0;
+                
+                input.value = `${String(newHours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+            }
+            saveInputs();
+        }
+
+        function val(id) {
+            const v = document.getElementById(id).value;
+            return v ? v : '';
+        }
+
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('blur', (e) => {
+                if(['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'].includes(e.target.id)) {
+                    roundInputTime(e.target.id);
+                }
+            });
+        });
+
+        function num(id) {
+            const v = document.getElementById(id).value;
+            return v ? parseFloat(v) : null;
+        }
+
+        function formatDate(id) {
+            const v = document.getElementById(id).value;
+            if (!v) return '';
+            const parts = v.split('-'); 
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function formatDateTime(id) {
+            const v = document.getElementById(id).value;
+            if (!v) return '';
+            const [datePart, timePart] = v.split('T');
+            const dateParts = datePart.split('-'); 
+            const shortYear = dateParts[0].slice(-2); 
+            return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
+        }
+
+        function formatLine(col1, col2, col3 = "") {
+            const pad1 = 20; 
+            const inlinePad = 15; 
+            
+            let str = col1.padEnd(pad1);
+            if (col3) {
+                str += String(col2).padEnd(inlinePad) + col3;
+                return str.trimEnd() + "\n";
+            } else {
+                return str + col2 + "\n";
+            }
+        }
+
+        function generateSheet() {
+            const timeFields = ['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'];
+            timeFields.forEach(id => roundInputTime(id));
+
+            let startKmV = num('startKm');
+            let baseKmV = num('baseKm');
+            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : `[[START KILOMETERAGE]-[BASE KILOMETERAGE]=]`;
+            
+            let baseKmEV = num('baseKmE');
+            let endKmV = num('endKm');
+            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
+
+            const startT = document.getElementById('startTime').value;
+            const endT = document.getElementById('endTime').value;
+            const sbyT = document.getElementById('standby').value;
+
+            if (startT && endT) {
+                const startDate = new Date(startT);
+                const endDate = new Date(endT);
+                let diffMs = endDate - startDate;
+                if (diffMs >= 0) {
+                    if (sbyT) {
+                        const [hours, minutes] = sbyT.split(':').map(Number);
+                        const standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                        diffMs -= standbyMs;
+                    }
+                    if (diffMs < 0) diffMs = 0;
+                    const decimalHours = diffMs / (1000 * 60 * 60);
+                    document.getElementById('pilotTime').value = decimalHours.toFixed(2) + ' hrs'; 
+                    saveInputs();
+                }
+            }
+            let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME HH:MM DDMMYY]-[START TIME HH:MM DDMMYY])-[STANDBY HH:MM]*24=]`;
+
+            const tbStart = document.getElementById('timeBase').value;
+            const tbEnd = document.getElementById('timeBaseE').value;
+
+            if (tbStart && tbEnd) {
+                const startDate = new Date(tbStart);
+                const endDate = new Date(tbEnd);
+                let diffMs = endDate - startDate;
+                if (diffMs >= 0) {
+                    const decimalHours = diffMs / (1000 * 60 * 60);
+                    document.getElementById('timesheetTotal').value = decimalHours.toFixed(2) + ' hrs';
+                    saveInputs();
+                }
+            }
+            let tsTotalVal = document.getElementById('timesheetTotal').value || `[([TIME AT BASE (E)]-[TIME AT BASE])*24=]`;
+
+            const tReq = document.getElementById('timeReq').value;
+            const sTime = document.getElementById('startTime').value;
+
+            if ((tReq && sTime) || sbyT) {
+                let diffMs = 0;
+                if (tReq && sTime) {
+                    const dateReq = new Date(tReq);
+                    const dateStart = new Date(sTime);
+                    diffMs = dateStart - dateReq;
+                    if (diffMs < 0) diffMs = 0; 
+                }
+
+                let standbyMs = 0;
+                if (sbyT) {
+                    const [hours, minutes] = sbyT.split(':').map(Number);
+                    standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                }
+
+                const totalStandbyMs = diffMs + standbyMs;
+                const decimalHours = totalStandbyMs / (1000 * 60 * 60);
+                document.getElementById('standbyTotal').value = decimalHours.toFixed(2) + ' hrs';
+                saveInputs();
+            }
+            let standbyTotalVal = document.getElementById('standbyTotal').value || `[([START TIME]-[TIME REQUIRED])+[STANDBY HH:MM]=]`;
+
+            let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
+            txt += (formatDate('date') ? formatDate('date').padEnd(20) : '[DATE]               ') + (val('uniqueId') || '[UNIQUE ID]') + "\n\n";
+            txt += formatLine("CUSTOMER", val('customer') || '[CUSTOMER]');
+            txt += formatLine("DESCRIPTION", val('description') || '[DESCRIPTION]') + "\n";
+            txt += formatLine("START ADDRESS", val('startAddr') || '[START ADDRESS]');
+            txt += formatLine("END ADDRESS", val('endAddr') || '[END ADDRESS]') + "\n";
+            
+            txt += formatLine("BASE MILEAGE", valKm('baseKm') || '[BASE KM]', formatDateTime('timeBase'));
+            txt += formatLine("START MILEAGE", valKm('startKm') || '[START KM]', formatDateTime('timeStart')) + "\n";
+            
+            txt += formatLine("TIME REQUIRED", formatDateTime('timeReq'));
+            txt += formatLine("START TIME", formatDateTime('startTime'));
+            txt += formatLine("END TIME", formatDateTime('endTime'));
+            txt += formatLine("STANDBY", val('standby') || '[STANDBY]') + "\n";
+            
+            txt += formatLine("END MILEAGE", valKm('endKm') || '[END KM]', formatDateTime('endTime'));
+            txt += formatLine("BASE MILEAGE", valKm('baseKmE') || '[BASE KM E]', formatDateTime('timeBaseE')) + "\n";
+            
+            txt += formatLine("PILOT TIME SHEET", `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}`) + "\n";
+            
+            txt += "TOTALS\n";
+            txt += formatLine("BASE TO START", baseToStartCalc);
+            txt += formatLine("PILOT TIME", pilotTimeVal);
+            txt += formatLine("STANDBY TOTAL", standbyTotalVal);
+            txt += formatLine("END TO BASE", endToBaseCalc);
+            txt += formatLine("TIMESHEET TOTAL", tsTotalVal) + "\n";
+            
+            txt += formatLine("NOTES", val('notes') || '[NOTES]');
+
+            document.getElementById('output').textContent = txt;
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('output').textContent;
+            const btn = document.getElementById('copyBtn');
+            
+            const fallbackCopy = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    document.execCommand('copy');
+                    btn.textContent = "Copied!";
+                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                } catch (err) {
+                    alert("Copy failed. Your browser may be blocking it. Please select the text manually.");
+                }
+                
+                document.body.removeChild(textArea);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    btn.textContent = "Copied!";
+                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                }).catch(() => {
+                    fallbackCopy(outputText);
+                });
+            } else {
+                fallbackCopy(outputText);
+            }
+        }
+
+        // New Excel Export Function
+        function exportToExcel() {
+            const uid = document.getElementById('uniqueId').value || 'Draft';
+            
+            // Generate calculations cleanly for spreadsheet layout
+            let startKmV = num('startKm');
+            let baseKmV = num('baseKm');
+            let baseToStart = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV) : '';
+            
+            let baseKmEV = num('baseKmE');
+            let endKmV = num('endKm');
+            let endToBase = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV) : '';
+
+            // Map data out into structured row arrays
+            const rowData = [
+                ["Field", "Value / Start Metric", "End Metric / Context"],
+                ["Jobsheet ID", uid, ""],
+                ["Date", formatDate('date'), ""],
+                ["Customer", val('customer'), ""],
+                ["Description", val('description'), ""],
+                ["Start Address", val('startAddr'), ""],
+                ["End Address", val('endAddr'), ""],
+                ["", "", ""], // Blank breaker line
+                ["MILEAGE & TIME LOGS", "", ""],
+                ["Base Mileage", valKm('baseKm'), formatDateTime('timeBase')],
+                ["Start Mileage", valKm('startKm'), formatDateTime('timeStart')],
+                ["Time Required", formatDateTime('timeReq'), ""],
+                ["Start Time", formatDateTime('startTime'), ""],
+                ["End Time", formatDateTime('endTime'), ""],
+                ["Standby Input", val('standby'), ""],
+                ["End Mileage", valKm('endKm'), formatDateTime('endTime')],
+                ["Base Mileage (E)", valKm('baseKmE'), formatDateTime('timeBaseE')],
+                ["", "", ""], 
+                ["CALCULATED TOTALS", "", ""],
+                ["Base to Start", baseToStart ? `${baseToStart} KM` : '', ""],
+                ["Pilot Time", val('pilotTime'), ""],
+                ["Standby Total", val('standbyTotal'), ""],
+                ["End to Base", endToBase ? `${endToBase} KM` : '', ""],
+                ["Timesheet Total", val('timesheetTotal'), ""],
+                ["", "", ""],
+                ["Notes", val('notes'), ""]
+            ];
+
+            // Build workbook structure
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(rowData);
+
+            // Dynamically size column bounds to prevent data clipping inside Excel grids
+            ws['!cols'] = [
+                { wch: 22 }, // Column A
+                { wch: 45 }, // Column B
+                { wch: 25 }  // Column C
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Jobsheet Summary");
+            XLSX.writeFile(wb, `Jobsheet_${uid}.xlsx`);
+        }
+    </script>
+</body>
+</html>
