@@ -253,12 +253,10 @@
                 <div class="form-group"><label>Time at Base (E)</label><input type="datetime-local" id="timeBaseE"></div>
             </div>
 
-            <div class="form-row" style="flex-wrap: wrap;">
-                <div class="form-group"><label>Pilot Time Total</label><input type="text" id="pilotTime" placeholder="Auto"></div>
-                <div class="form-group"><label>Timesheet Total</label><input type="text" id="timesheetTotal" placeholder="Auto"></div>
-                <div class="form-group"><label>Standby Total</label><input type="text" id="standbyTotal" placeholder="Auto"></div>
-                <div class="form-group"><label>Pilot Mileage Total</label><input type="text" id="pilotKmTotal" placeholder="Auto"></div>
-            </div>
+            <input type="hidden" id="pilotTime">
+            <input type="hidden" id="timesheetTotal">
+            <input type="hidden" id="standbyTotal">
+            <input type="hidden" id="pilotKmTotal">
             
             <div class="form-group"><label>Notes</label><textarea id="notes" rows="3"></textarea></div>
 
@@ -521,7 +519,7 @@
             let endKmV = num('endKm');
             let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
 
-            // Calculate Pilot Mileage (End Mileage - Start Mileage)
+            // Calculate Pilot Mileage
             let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : `[[END KILOMETERAGE]-[START KILOMETERAGE]=]`;
             if (endKmV !== null && startKmV !== null) {
                 document.getElementById('pilotKmTotal').value = `${endKmV - startKmV} KM`;
@@ -613,7 +611,7 @@
             txt += formatLine("BASE TO START", baseToStartCalc);
             txt += formatLine("PILOT TIME", pilotTimeVal);
             txt += formatLine("STANDBY TOTAL", standbyTotalVal);
-            txt += formatLine("PILOT MILEAGE", pilotKmCalc); // Inserted cleanly here
+            txt += formatLine("PILOT MILEAGE", pilotKmCalc);
             txt += formatLine("END TO BASE", endToBaseCalc);
             txt += formatLine("TIMESHEET TOTAL", tsTotalVal) + "\n";
             
@@ -695,7 +693,7 @@
                 ["Base to Start", baseToStart ? `${baseToStart} KM` : '', ""],
                 ["Pilot Time", val('pilotTime'), ""],
                 ["Standby Total", val('standbyTotal'), ""],
-                ["Pilot Mileage", pilotKm ? `${pilotKm} KM` : '', ""], // Added to Excel schema
+                ["Pilot Mileage", pilotKm ? `${pilotKm} KM` : '', ""],
                 ["End to Base", endToBase ? `${endToBase} KM` : '', ""],
                 ["Timesheet Total", val('timesheetTotal'), ""],
                 ["", "", ""],
