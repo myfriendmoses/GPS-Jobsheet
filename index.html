@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
+    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -194,6 +195,7 @@
     </div>
 
     <div class="container">
+        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -250,6 +252,7 @@
             </div>
         </div>
 
+        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -465,16 +468,16 @@
             }
             let tsTotalVal = document.getElementById('timesheetTotal').value || `[([TIME AT BASE (E)]-[TIME AT BASE])*24=]`;
 
-            // Calculate Standby Total (Time Required to Time at Start + Standby Duration)
+            // Calculate Standby Total (Time Required to Start Time + Standby Duration)
             const tReq = document.getElementById('timeReq').value;
-            const tStart = document.getElementById('timeStart').value;
+            const sTime = document.getElementById('startTime').value;
 
-            if ((tReq && tStart) || sbyT) {
+            if ((tReq && sTime) || sbyT) {
                 let diffMs = 0;
                 
-                if (tReq && tStart) {
+                if (tReq && sTime) {
                     const dateReq = new Date(tReq);
-                    const dateStart = new Date(tStart);
+                    const dateStart = new Date(sTime);
                     diffMs = dateStart - dateReq;
                     if (diffMs < 0) diffMs = 0; // Prevent negative standby if they start earlier than required
                 }
@@ -490,7 +493,7 @@
                 document.getElementById('standbyTotal').value = decimalHours.toFixed(2) + ' hrs';
                 saveInputs();
             }
-            let standbyTotalVal = document.getElementById('standbyTotal').value || `[([TIME AT START]-[TIME REQUIRED])+[STANDBY HH:MM]=]`;
+            let standbyTotalVal = document.getElementById('standbyTotal').value || `[([START TIME]-[TIME REQUIRED])+[STANDBY HH:MM]=]`;
 
 
             let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
