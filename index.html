@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
+    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
+    <!-- SheetJS Library for Excel Exporting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
@@ -210,6 +213,7 @@
     </div>
 
     <div class="container">
+        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -267,6 +271,7 @@
             </div>
         </div>
 
+        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -278,6 +283,7 @@
         </div>
     </div>
 
+    <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
             var startLookup = new AddyComplete(document.getElementById("startAddr"));
@@ -314,6 +320,7 @@
         }
     </script>
 
+    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
@@ -466,16 +473,50 @@
             return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
         }
 
+        // SMART INLINE WORD WRAPPER LOGIC FOR INDENTED NEW LINES
         function formatLine(col1, col2, col3 = "") {
             const pad1 = 20; 
             const inlinePad = 15; 
+            const maxWidth = 50; // Text length baseline before forcing indentation wrap lines
             
-            let str = col1.padEnd(pad1);
+            let headStr = col1.padEnd(pad1);
+            
             if (col3) {
-                str += String(col2).padEnd(inlinePad) + col3;
-                return str.trimEnd() + "\n";
+                headStr += String(col2).padEnd(inlinePad) + col3;
+                return headStr.trimEnd() + "\n";
             } else {
-                return str + col2 + "\n";
+                // Address & customer wrap check
+                let text = String(col2);
+                if (text.length <= maxWidth) {
+                    return headStr + text + "\n";
+                }
+                
+                // Break long texts across multiple lines nicely
+                let result = "";
+                let firstLine = true;
+                
+                while (text.length > 0) {
+                    let chunk = text.substring(0, maxWidth);
+                    
+                    // Try to break cleanly at spaces instead of cutting words in half
+                    if (text.length > maxWidth) {
+                        let lastSpace = chunk.lastIndexOf(" ");
+                        if (lastSpace > maxWidth * 0.6) {
+                            chunk = text.substring(0, lastSpace);
+                        }
+                    }
+                    
+                    if (firstLine) {
+                        result += headStr + chunk.trim() + "\n";
+                        firstLine = false;
+                    } else {
+                        // Injects 20 spaces to explicitly align new block line text under column 2 start position
+                        result += "".padEnd(pad1) + chunk.trim() + "\n";
+                    }
+                    
+                    text = text.substring(chunk.length).trim();
+                }
+                return result;
             }
         }
 
@@ -623,11 +664,9 @@
             }
         }
 
-        // New Excel Export Function
         function exportToExcel() {
             const uid = document.getElementById('uniqueId').value || 'Draft';
             
-            // Generate calculations cleanly for spreadsheet layout
             let startKmV = num('startKm');
             let baseKmV = num('baseKm');
             let baseToStart = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV) : '';
@@ -636,7 +675,6 @@
             let endKmV = num('endKm');
             let endToBase = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV) : '';
 
-            // Map data out into structured row arrays
             const rowData = [
                 ["Field", "Value / Start Metric", "End Metric / Context"],
                 ["Jobsheet ID", uid, ""],
@@ -645,7 +683,7 @@
                 ["Description", val('description'), ""],
                 ["Start Address", val('startAddr'), ""],
                 ["End Address", val('endAddr'), ""],
-                ["", "", ""], // Blank breaker line
+                ["", "", ""], 
                 ["MILEAGE & TIME LOGS", "", ""],
                 ["Base Mileage", valKm('baseKm'), formatDateTime('timeBase')],
                 ["Start Mileage", valKm('startKm'), formatDateTime('timeStart')],
@@ -666,15 +704,13 @@
                 ["Notes", val('notes'), ""]
             ];
 
-            // Build workbook structure
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(rowData);
 
-            // Dynamically size column bounds to prevent data clipping inside Excel grids
             ws['!cols'] = [
-                { wch: 22 }, // Column A
-                { wch: 45 }, // Column B
-                { wch: 25 }  // Column C
+                { wch: 22 }, 
+                { wch: 45 }, 
+                { wch: 25 }  
             ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Jobsheet Summary");
