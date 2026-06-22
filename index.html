@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
+    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -134,17 +133,11 @@
         .btn-danger:hover {
             background-color: var(--danger-hover);
         }
-        .btn-info {
-            background-color: var(--info);
-        }
-        .btn-info:hover {
-            background-color: var(--info-hover);
-        }
         .output-section {
             display: flex;
             flex-direction: column;
         }
-        .pdf-container {
+        .output-wrapper {
             background: #ffffff;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -202,6 +195,7 @@
     </div>
 
     <div class="container">
+        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -257,13 +251,13 @@
             </div>
         </div>
 
+        <!-- Output Display -->
         <div class="output-section">
-            <div class="pdf-container" id="pdfWrapper">
+            <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
             </div>
             <div class="button-group">
                 <button id="copyBtn" onclick="copyToClipboard()">Copy to Clipboard</button>
-                <button class="btn-info" onclick="downloadPDF()">Download PDF</button>
             </div>
         </div>
     </div>
@@ -532,61 +526,6 @@
             } else {
                 fallbackCopy(outputText);
             }
-        }
-
-        // Bulletproof PDF Generator using a Clone
-        function downloadPDF() {
-            const uid = document.getElementById('uniqueId').value || 'Draft';
-            const outputText = document.getElementById('output').textContent;
-
-            // 1. Create a temporary, unconstrained div hidden off-screen
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.top = '-9999px';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.width = '800px'; 
-            tempDiv.style.padding = '40px';
-            tempDiv.style.backgroundColor = '#ffffff';
-            tempDiv.style.color = '#000000';
-
-            // 2. Add the Logo to the temporary div
-            const img = document.createElement('img');
-            img.src = 'logo.png';
-            img.style.maxHeight = '60px';
-            img.style.display = 'block';
-            img.style.margin = '0 auto 20px auto';
-            // If the local image is blocked by security, just hide it so it doesn't crash the PDF
-            img.onerror = function() { this.style.display = 'none'; };
-
-            // 3. Add the Jobsheet Text
-            const pre = document.createElement('pre');
-            pre.style.whiteSpace = 'pre-wrap';
-            pre.style.fontFamily = '"Courier New", Courier, monospace';
-            pre.style.fontSize = '14px';
-            pre.style.margin = '0';
-            pre.style.border = 'none';
-            pre.style.background = 'transparent';
-            pre.textContent = outputText;
-
-            // Assemble
-            tempDiv.appendChild(img);
-            tempDiv.appendChild(pre);
-            document.body.appendChild(tempDiv);
-
-            // 4. Generate the PDF
-            const opt = {
-                margin:       15,
-                filename:     `Jobsheet_${uid}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                // allowTaint is the magic fix for local file:// image blocking
-                html2canvas:  { scale: 2, useCORS: true, allowTaint: true }, 
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(tempDiv).save().then(() => {
-                // Cleanup the hidden div after generating
-                document.body.removeChild(tempDiv);
-            });
         }
     </script>
 </body>
