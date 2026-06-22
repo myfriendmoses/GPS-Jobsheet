@@ -41,6 +41,67 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+        /* Full Screen Prerequisite Gate Shield Overlay */
+        #installGateOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172abf;
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none; /* Controlled dynamically via mobile check script */
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+        .gate-card {
+            background: var(--surface);
+            max-width: 500px;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        .gate-card h2 {
+            color: var(--primary);
+            margin-top: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            font-size: 1.5rem;
+        }
+        .gate-card p {
+            color: #475569;
+            margin: 1rem 0 2rem 0;
+            font-size: 0.95rem;
+        }
+        .gate-card ol {
+            text-align: left;
+            color: #334155;
+            font-size: 0.90rem;
+            margin-bottom: 2rem;
+            padding-left: 1.25rem;
+        }
+        .gate-card ol li {
+            margin-bottom: 0.5rem;
+        }
+        .btn-gate-install {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            display: inline-block;
+            width: auto;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+        }
+        .btn-gate-install:hover {
+            background-color: #1d4ed8;
+        }
+
         .app-header {
             text-align: center;
             margin-bottom: 2rem;
@@ -217,6 +278,26 @@
 </head>
 <body>
 
+    <!-- Prerequisite Gate Overlay Screen Wrapper -->
+    <div id="installGateOverlay">
+        <div class="gate-card">
+            <h2>Mobile App Installation Required</h2>
+            <p>To ensure total offline availability and continuous background auto-saving during pilot transit operations, this application must be added to your mobile home screen first.</p>
+            
+            <ol>
+                <li>Click the <strong>Install App to Device</strong> button directly below.</li>
+                <li>If prompted, approve the browser request shortcut query.</li>
+                <li>Launch the app from your home screen icon to unlock access!</li>
+            </ol>
+            
+            <button id="gateInstallBtn" class="btn-gate-install">📥 Install App to Device</button>
+            
+            <p id="safariNotice" style="display:none; font-size: 0.8rem; font-style: italic; margin-top: 1.5rem;">
+                Using an iPhone/iPad? Tap the browser <strong>Share button</strong> panel icon below and choose <strong>'Add to Home Screen'</strong> manually.
+            </p>
+        </div>
+    </div>
+
     <div class="app-header">
         <img src="logo.png" alt="GPS Logo" class="app-logo" onerror="this.style.display='none'">
         <h1>Goodwin Piloting Services Jobsheet</h1>
@@ -337,7 +418,11 @@
 
     <script>
         let saveTimeout;
+        let deferredPrompt;
+        const gateOverlay = document.getElementById('installGateOverlay');
+        const gateInstallBtn = document.getElementById('gateInstallBtn');
 
+        // 1. Service Worker initialization
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => self.skipWaiting());
@@ -347,7 +432,63 @@
             navigator.serviceWorker.register(URL.createObjectURL(blob));
         }
 
+        // 2. FIXED: Verify condition rule restriction solely for smartphone/tablet targets
+        function checkStandaloneMode() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // If it's a desktop computer, bypass the block entirely
+            if (!isMobile) {
+                gateOverlay.style.display = 'none';
+                return;
+            }
+
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isStandalone) {
+                gateOverlay.style.display = 'none'; 
+            } else {
+                gateOverlay.style.display = 'flex'; 
+                if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    gateInstallBtn.style.display = 'none';
+                    document.getElementById('safariNotice').style.display = 'block';
+                }
+            }
+        }
+
+        // 3. Intercept installation availability parameters
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile && !window.matchMedia('(display-mode: standalone)').matches) {
+                gateOverlay.style.display = 'flex';
+                gateInstallBtn.style.display = 'inline-block';
+            }
+        });
+
+        // 4. Handle installation click trigger
+        gateInstallBtn.addEventListener('click', () => {
+            if (!deferredPrompt) {
+                alert("Installation target engine could not be mapped. Tap your browser menu settings panel and click 'Add to Home Screen' manually.");
+                return;
+            }
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    gateOverlay.style.display = 'none';
+                }
+                deferredPrompt = null;
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            gateOverlay.style.display = 'none';
+            deferredPrompt = null;
+        });
+
         window.onload = function() {
+            checkStandaloneMode(); 
+            
             loadInputs();
             if (!document.getElementById('uniqueId').value) {
                 generateRandomId();
@@ -385,7 +526,6 @@
             }
         }
 
-        // Return input value + KM, or NULL if empty
         function valKm(id) {
             const v = document.getElementById(id).value;
             return v ? `${v} KM` : 'NULL';
@@ -453,7 +593,6 @@
             saveInputs();
         }
 
-        // Return text string, or NULL if empty
         function val(id) {
             const v = document.getElementById(id).value;
             return v ? v : 'NULL';
