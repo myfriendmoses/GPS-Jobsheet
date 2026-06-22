@@ -1,0 +1,41 @@
+# Goodwin Piloting Services - Jobsheet Generator
+
+A lightweight, secure, and privacy-focused Progressive Web App (PWA) designed for transport pilot operators to log, track, and generate structural plaintext jobsheets. Running completely client-side inside a single file, it automates complex mileage calculations, rounds time entries to the nearest 15 minutes, and formats logistics summaries perfectly optimized for easy clipboard sharing or data logging.
+
+## 🚀 Key Features
+
+* **Smart Time Rounding:** Automatically standardizes variable logistics logs by rounding time stamps to the nearest 15-minute interval on focus out.
+* **Automated Metrics & Totals Engine:** Instant calculations compute exact durations and lengths for:
+* *Pilot Time* (accounting for customized explicit standby adjustments)
+* *Standby Total* (calculating the variance between Time Required and Start Time)
+* *Pilot Mileage* (calculating net transit distance between Start/End KM metrics)
+* *Timesheet Total* (total duration from base departure to return)
+
+
+* **NZ Post Address Autocomplete:** Integrated with the official **Addy.co.nz Autocomplete API** to dynamically search and fill complete, verified New Zealand street entries.
+* **Intelligent Wrapped Layout System:** Built with a custom text-indent wrapping routine that guarantees multi-line addresses or customers align cleanly with right-hand columns instead of spilling under labels.
+* **Multi-Format Export Options:** One-click utility actions to **Copy Raw Layout** text blocks, export clean data models via a native **Excel Spreadsheet (.xlsx)** engine, or launch your system's client to **Send via Email**.
+
+## 🔌 Offline Capability & Data Privacy
+
+* **Zero Server Architecture:** The app runs 100% locally on your device. Your business operation data is never uploaded, transferred, or processed by any external cloud storage or servers.
+* **Persistent Local Caching:** Leverages continuous HTML5 `localStorage` tracking to instantly save field state configurations. If your browser crashes or a device restarts mid-job, your progress is safely restored.
+* **Offline Operational Support:** Features an embedded Service Worker script. Once opened online once or saved onto a phone or tablet home screen as an installed app (PWA), the entire core shell functions flawlessly without any internet or cellular coverage.
+* *Note: Real-time address autocomplete list querying naturally requires active network data. When offline, fields cleanly fallback to manual entry.*
+
+
+
+## 🛠️ Configuration & Installation
+
+Because the application is completely self-contained within a single HTML document, deployment takes seconds:
+
+1. Clone or download the `index.html` file onto your machine or mobile device.
+2. Open the script code and locate the Addy execution source line near the bottom:
+```html
+<script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=YOUR_API_KEY_HERE&country=nz&callback=initAddy" async defer></script>
+
+```
+
+
+3. Replace the `nzKey` parameter with your private developer API key generated from [Addy.co.nz](https://www.addy.co.nz/).
+4. Launch the document directly in any modern browser, or click "Install App / Add to Home Screen" on your mobile device to utilize full standalone PWA benefits.
