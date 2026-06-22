@@ -437,11 +437,13 @@
             
             let str = col1.padEnd(pad1);
             if (col3) {
+                // If there's a third column (like mileage date/times), use regular padded bounds
                 str += String(col2).padEnd(inlinePad) + col3;
+                return str.trimEnd() + "\n";
             } else {
-                str += col2;
+                // If it's a structural text line like an address, append full value directly to prevent truncation
+                return str + col2 + "\n";
             }
-            return str.trimEnd() + "\n";
         }
 
         function generateSheet() {
