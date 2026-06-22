@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
-    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -195,7 +194,6 @@
     </div>
 
     <div class="container">
-        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -238,9 +236,10 @@
                 <div class="form-group"><label>Time at Base (E)</label><input type="datetime-local" id="timeBaseE"></div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group"><label>Pilot Time Total</label><input type="text" id="pilotTime" placeholder="Auto-calculates"></div>
-                <div class="form-group"><label>Timesheet Total</label><input type="text" id="timesheetTotal" placeholder="Auto-calculates"></div>
+            <div class="form-row" style="flex-wrap: wrap;">
+                <div class="form-group"><label>Pilot Time Total</label><input type="text" id="pilotTime" placeholder="Auto"></div>
+                <div class="form-group"><label>Timesheet Total</label><input type="text" id="timesheetTotal" placeholder="Auto"></div>
+                <div class="form-group"><label>Standby Total</label><input type="text" id="standbyTotal" placeholder="Auto"></div>
             </div>
             
             <div class="form-group"><label>Notes</label><textarea id="notes" rows="3"></textarea></div>
@@ -251,7 +250,6 @@
             </div>
         </div>
 
-        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -428,6 +426,7 @@
             let endKmV = num('endKm');
             let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV).toString() : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
 
+            // Calculate Pilot Time Total
             const startT = document.getElementById('startTime').value;
             const endT = document.getElementById('endTime').value;
             const sbyT = document.getElementById('standby').value;
@@ -450,6 +449,7 @@
             }
             let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME DDMMYYYY HH:MM]-[START TIME DDMMYYYY HH:MM])-[STANDBY HH:MM]*24=]`;
 
+            // Calculate Timesheet Total
             const tbStart = document.getElementById('timeBase').value;
             const tbEnd = document.getElementById('timeBaseE').value;
 
@@ -464,6 +464,34 @@
                 }
             }
             let tsTotalVal = document.getElementById('timesheetTotal').value || `[([TIME AT BASE (E)]-[TIME AT BASE])*24=]`;
+
+            // Calculate Standby Total (Time Required to Time at Start + Standby Duration)
+            const tReq = document.getElementById('timeReq').value;
+            const tStart = document.getElementById('timeStart').value;
+
+            if ((tReq && tStart) || sbyT) {
+                let diffMs = 0;
+                
+                if (tReq && tStart) {
+                    const dateReq = new Date(tReq);
+                    const dateStart = new Date(tStart);
+                    diffMs = dateStart - dateReq;
+                    if (diffMs < 0) diffMs = 0; // Prevent negative standby if they start earlier than required
+                }
+
+                let standbyMs = 0;
+                if (sbyT) {
+                    const [hours, minutes] = sbyT.split(':').map(Number);
+                    standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                }
+
+                const totalStandbyMs = diffMs + standbyMs;
+                const decimalHours = totalStandbyMs / (1000 * 60 * 60);
+                document.getElementById('standbyTotal').value = decimalHours.toFixed(2) + ' hrs';
+                saveInputs();
+            }
+            let standbyTotalVal = document.getElementById('standbyTotal').value || `[([TIME AT START]-[TIME REQUIRED])+[STANDBY HH:MM]=]`;
+
 
             let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
             txt += formatDate('date').padEnd(20) + val('uniqueId') + "\n\n";
@@ -484,6 +512,7 @@
             txt += formatLine("BASE TO START", baseToStartCalc);
             txt += formatLine("PILOT TIME", pilotTimeVal);
             txt += formatLine("TIMESHEET TOTAL", tsTotalVal);
+            txt += formatLine("STANDBY TOTAL", standbyTotalVal);
             txt += formatLine("END TO BASE", endToBaseCalc) + "\n";
             txt += formatLine("NOTES", val('notes'));
 
