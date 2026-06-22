@@ -328,6 +328,7 @@
             saveTimeout = setTimeout(() => { indicator.style.opacity = '0'; }, 1500);
         }
 
+        // Random ID Generator (e.g., GPS-A1B2C3)
         function generateRandomId() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let id = 'GPS-';
@@ -390,6 +391,7 @@
             return v ? parseFloat(v) : null;
         }
 
+        // Format main date explicitly to DD/MM/YYYY
         function formatDate(id) {
             const v = document.getElementById(id).value;
             if (!v) return `[${id.toUpperCase()}]`;
@@ -397,13 +399,14 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
-        // SWAPPED FORMAT: Format <input type="datetime-local"> (YYYY-MM-DDTHH:MM) to HH:MM DDMMYYYY (24H)
+        // UPDATED SHORT CONTEXT: Formats <input type="datetime-local"> to HH:MM DDMMYY
         function formatDateTime(id) {
             const v = document.getElementById(id).value;
-            if (!v) return `[${id.toUpperCase()} HH:MM DDMMYYYY]`;
+            if (!v) return `[${id.toUpperCase()} HH:MM DDMMYY]`;
             const [datePart, timePart] = v.split('T');
-            const dateParts = datePart.split('-');
-            return `${timePart} ${dateParts[2]}${dateParts[1]}${dateParts[0]}`;
+            const dateParts = datePart.split('-'); // [YYYY, MM, DD]
+            const shortYear = dateParts[0].slice(-2); // Pulls only the last two digits 'YY'
+            return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
         }
 
         function formatLine(col1, col2, col3 = "") {
@@ -451,7 +454,7 @@
                     saveInputs();
                 }
             }
-            let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME HH:MM DDMMYYYY]-[START TIME HH:MM DDMMYYYY])-[STANDBY HH:MM]*24=]`;
+            let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME HH:MM DDMMYY]-[START TIME HH:MM DDMMYY])-[STANDBY HH:MM]*24=]`;
 
             // Calculate Timesheet Total
             const tbStart = document.getElementById('timeBase').value;
