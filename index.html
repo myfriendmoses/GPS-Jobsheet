@@ -510,30 +510,75 @@
             document.getElementById('output').textContent = txt;
         }
 
+        // Updated Bulletproof Clipboard Function
         function copyToClipboard() {
             const outputText = document.getElementById('output').textContent;
-            navigator.clipboard.writeText(outputText).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.textContent = "Copied!";
-                setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
-            });
+            const btn = document.getElementById('copyBtn');
+            
+            // Fallback for older browsers or local file:// protocol on mobile
+            const fallbackCopy = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    document.execCommand('copy');
+                    btn.textContent = "Copied!";
+                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                } catch (err) {
+                    alert("Copy failed. Your browser may be blocking it. Please select the text manually.");
+                }
+                
+                document.body.removeChild(textArea);
+            };
+
+            // Check if modern Clipboard API is available and context is secure
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    btn.textContent = "Copied!";
+                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                }).catch(() => {
+                    // Modern API failed, try legacy
+                    fallbackCopy(outputText);
+                });
+            } else {
+                // Not a secure context (like local file), use legacy fallback immediately
+                fallbackCopy(outputText);
+            }
         }
 
         function downloadPDF() {
             const element = document.getElementById('pdfWrapper');
             const header = document.getElementById('pdfHeader');
             const uid = document.getElementById('uniqueId').value || 'Draft';
+            
             header.style.display = 'block';
+            element.style.overflow = 'visible'; 
+            element.style.border = 'none'; 
+
             const opt = {
-                margin:       10,
+                margin:       15,
                 filename:     `Jobsheet_${uid}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().set(opt).from(element).save().then(() => {
-                header.style.display = 'none';
-            });
+
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    header.style.display = 'none';
+                    element.style.overflow = 'auto';
+                    element.style.border = '1px solid var(--border)';
+                });
+            }, 150);
         }
     </script>
 </body>
