@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
+    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
+    <!-- SheetJS Library for Excel Exporting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
@@ -220,6 +223,7 @@
     </div>
 
     <div class="container">
+        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -276,6 +280,7 @@
             </div>
         </div>
 
+        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -288,6 +293,7 @@
         </div>
     </div>
 
+    <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
             var startLookup = new AddyComplete(document.getElementById("startAddr"));
@@ -326,6 +332,7 @@
         }
     </script>
 
+    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
@@ -378,9 +385,10 @@
             }
         }
 
+        // Return input value + KM, or NULL if empty
         function valKm(id) {
             const v = document.getElementById(id).value;
-            return v ? `${v} KM` : '';
+            return v ? `${v} KM` : 'NULL';
         }
 
         function clearForm() {
@@ -445,9 +453,10 @@
             saveInputs();
         }
 
+        // Return text string, or NULL if empty
         function val(id) {
             const v = document.getElementById(id).value;
-            return v ? v : '';
+            return v ? v : 'NULL';
         }
 
         document.querySelectorAll('input, textarea').forEach(el => {
@@ -465,14 +474,14 @@
 
         function formatDate(id) {
             const v = document.getElementById(id).value;
-            if (!v) return '';
+            if (!v) return 'NULL';
             const parts = v.split('-'); 
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
         function formatDateTime(id) {
             const v = document.getElementById(id).value;
-            if (!v) return '';
+            if (!v) return 'NULL';
             const [datePart, timePart] = v.split('T');
             const dateParts = datePart.split('-'); 
             const shortYear = dateParts[0].slice(-2); 
@@ -524,21 +533,24 @@
 
             let startKmV = num('startKm');
             let baseKmV = num('baseKm');
-            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : `[[START KILOMETERAGE]-[BASE KILOMETERAGE]=]`;
+            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : 'NULL';
             
             let baseKmEV = num('baseKmE');
             let endKmV = num('endKm');
-            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
+            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : 'NULL';
 
-            let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : `[[END KILOMETERAGE]-[START KILOMETERAGE]=]`;
+            let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : 'NULL';
             if (endKmV !== null && startKmV !== null) {
                 document.getElementById('pilotKmTotal').value = `${endKmV - startKmV} KM`;
+            } else {
+                document.getElementById('pilotKmTotal').value = '';
             }
 
             const startT = document.getElementById('startTime').value;
             const endT = document.getElementById('endTime').value;
             const sbyT = document.getElementById('standby').value;
 
+            let pilotTimeVal = 'NULL';
             if (startT && endT) {
                 const startDate = new Date(startT);
                 const endDate = new Date(endT);
@@ -551,30 +563,36 @@
                     }
                     if (diffMs < 0) diffMs = 0;
                     const decimalHours = diffMs / (1000 * 60 * 60);
-                    document.getElementById('pilotTime').value = decimalHours.toFixed(2) + ' hrs'; 
+                    pilotTimeVal = decimalHours.toFixed(2) + ' hrs';
+                    document.getElementById('pilotTime').value = pilotTimeVal; 
                     saveInputs();
                 }
+            } else {
+                document.getElementById('pilotTime').value = '';
             }
-            let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME HH:MM DDMMYY]-[START TIME HH:MM DDMMYY])-[STANDBY HH:MM]*24=]`;
 
             const tbStart = document.getElementById('timeBase').value;
             const tbEnd = document.getElementById('timeBaseE').value;
 
+            let tsTotalVal = 'NULL';
             if (tbStart && tbEnd) {
                 const startDate = new Date(tbStart);
                 const endDate = new Date(tbEnd);
                 let diffMs = endDate - startDate;
                 if (diffMs >= 0) {
                     const decimalHours = diffMs / (1000 * 60 * 60);
-                    document.getElementById('timesheetTotal').value = decimalHours.toFixed(2) + ' hrs';
+                    tsTotalVal = decimalHours.toFixed(2) + ' hrs';
+                    document.getElementById('timesheetTotal').value = tsTotalVal;
                     saveInputs();
                 }
+            } else {
+                document.getElementById('timesheetTotal').value = '';
             }
-            let tsTotalVal = document.getElementById('timesheetTotal').value || `[([TIME AT BASE (E)]-[TIME AT BASE])*24=]`;
 
             const tReq = document.getElementById('timeReq').value;
             const sTime = document.getElementById('startTime').value;
 
+            let standbyTotalVal = 'NULL';
             if ((tReq && sTime) || sbyT) {
                 let diffMs = 0;
                 if (tReq && sTime) {
@@ -592,30 +610,32 @@
 
                 const totalStandbyMs = diffMs + standbyMs;
                 const decimalHours = totalStandbyMs / (1000 * 60 * 60);
-                document.getElementById('standbyTotal').value = decimalHours.toFixed(2) + ' hrs';
+                standbyTotalVal = decimalHours.toFixed(2) + ' hrs';
+                document.getElementById('standbyTotal').value = standbyTotalVal;
                 saveInputs();
+            } else {
+                document.getElementById('standbyTotal').value = '';
             }
-            let standbyTotalVal = document.getElementById('standbyTotal').value || `[([START TIME]-[TIME REQUIRED])+[STANDBY HH:MM]=]`;
 
             let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
-            txt += (formatDate('date') ? formatDate('date').padEnd(20) : '[DATE]               ') + (val('uniqueId') || '[UNIQUE ID]') + "\n\n";
-            txt += formatLine("CUSTOMER", val('customer') || '[CUSTOMER]');
-            txt += formatLine("DESCRIPTION", val('description') || '[DESCRIPTION]') + "\n";
-            txt += formatLine("START ADDRESS", val('startAddr') || '[START ADDRESS]');
-            txt += formatLine("END ADDRESS", val('endAddr') || '[END ADDRESS]') + "\n";
+            txt += (formatDate('date') !== 'NULL' ? formatDate('date').padEnd(20) : 'NULL                ') + val('uniqueId') + "\n\n";
+            txt += formatLine("CUSTOMER", val('customer'));
+            txt += formatLine("DESCRIPTION", val('description')) + "\n";
+            txt += formatLine("START ADDRESS", val('startAddr'));
+            txt += formatLine("END ADDRESS", val('endAddr')) + "\n";
             
-            txt += formatLine("BASE MILEAGE", valKm('baseKm') || '[BASE KM]', formatDateTime('timeBase'));
-            txt += formatLine("START MILEAGE", valKm('startKm') || '[START KM]', formatDateTime('timeStart')) + "\n";
+            txt += formatLine("BASE MILEAGE", valKm('baseKm'), formatDateTime('timeBase'));
+            txt += formatLine("START MILEAGE", valKm('startKm'), formatDateTime('timeStart')) + "\n";
             
             txt += formatLine("TIME REQUIRED", formatDateTime('timeReq'));
             txt += formatLine("START TIME", formatDateTime('startTime'));
             txt += formatLine("END TIME", formatDateTime('endTime'));
-            txt += formatLine("STANDBY", val('standby') || '[STANDBY]') + "\n";
+            txt += formatLine("STANDBY", val('standby'));
             
-            txt += formatLine("END MILEAGE", valKm('endKm') || '[END KM]', formatDateTime('endTime'));
-            txt += formatLine("BASE MILEAGE", valKm('baseKmE') || '[BASE KM E]', formatDateTime('timeBaseE')) + "\n";
+            txt += formatLine("END MILEAGE", valKm('endKm'), formatDateTime('endTime'));
+            txt += formatLine("BASE MILEAGE", valKm('baseKmE'), formatDateTime('timeBaseE')) + "\n";
             
-            txt += formatLine("PILOT TIME SHEET", `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}`) + "\n";
+            txt += formatLine("PILOT TIME SHEET", (formatDateTime('timeBase') !== 'NULL' && formatDateTime('timeBaseE') !== 'NULL') ? `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}` : 'NULL') + "\n";
             
             txt += "TOTALS\n";
             txt += formatLine("BASE TO START", baseToStartCalc);
@@ -625,7 +645,7 @@
             txt += formatLine("END TO BASE", endToBaseCalc);
             txt += formatLine("TIMESHEET TOTAL", tsTotalVal) + "\n";
             
-            txt += formatLine("NOTES", val('notes') || '[NOTES]');
+            txt += formatLine("NOTES", val('notes'));
 
             document.getElementById('output').textContent = txt;
         }
@@ -668,7 +688,6 @@
             }
         }
 
-        // New Native Mail Client Trigger System
         function sendViaEmail() {
             const uid = document.getElementById('uniqueId').value || 'Draft';
             const customerName = document.getElementById('customer').value || 'Jobsheet';
@@ -677,7 +696,6 @@
             const subject = encodeURIComponent(`GPS Jobsheet - ${uid} (${customerName})`);
             const body = encodeURIComponent(outputText);
             
-            // Fires browser link injection to hand off payload directly to default mail software
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
@@ -686,17 +704,17 @@
             
             let startKmV = num('startKm');
             let baseKmV = num('baseKm');
-            let baseToStart = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV) : '';
+            let baseToStart = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV) : null;
             
             let baseKmEV = num('baseKmE');
             let endKmV = num('endKm');
-            let endToBase = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV) : '';
-            let pilotKm = (endKmV !== null && startKmV !== null) ? (endKmV - startKmV) : '';
+            let endToBase = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV) : null;
+            let pilotKm = (endKmV !== null && startKmV !== null) ? (endKmV - startKmV) : null;
 
             const rowData = [
                 ["Field", "Value / Start Metric", "End Metric / Context"],
                 ["Jobsheet ID", uid, ""],
-                ["Date", formatDate('date'), ""],
+                ["Date", formatDate('date') !== 'NULL' ? formatDate('date') : "NULL", ""],
                 ["Customer", val('customer'), ""],
                 ["Description", val('description'), ""],
                 ["Start Address", val('startAddr'), ""],
@@ -713,12 +731,12 @@
                 ["Base Mileage (E)", valKm('baseKmE'), formatDateTime('timeBaseE')],
                 ["", "", ""], 
                 ["CALCULATED TOTALS", "", ""],
-                ["Base to Start", baseToStart ? `${baseToStart} KM` : '', ""],
-                ["Pilot Time", val('pilotTime'), ""],
-                ["Standby Total", val('standbyTotal'), ""],
-                ["Pilot Mileage", pilotKm ? `${pilotKm} KM` : '', ""],
-                ["End to Base", endToBase ? `${endToBase} KM` : '', ""],
-                ["Timesheet Total", val('timesheetTotal'), ""],
+                ["Base to Start", baseToStart !== null ? `${baseToStart} KM` : 'NULL', ""],
+                ["Pilot Time", val('pilotTime') || 'NULL', ""],
+                ["Standby Total", val('standbyTotal') || 'NULL', ""],
+                ["Pilot Mileage", pilotKm !== null ? `${pilotKm} KM` : 'NULL', ""],
+                ["End to Base", endToBase !== null ? `${endToBase} KM` : 'NULL', ""],
+                ["Timesheet Total", val('timesheetTotal') || 'NULL', ""],
                 ["", "", ""],
                 ["Notes", val('notes'), ""]
             ];
