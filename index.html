@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
-    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
-    <!-- SheetJS Library for Excel Exporting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
@@ -160,14 +157,16 @@
             margin-bottom: 1rem;
             padding: 2rem;
         }
+        
+        /* Updated typography settings to guarantee alignment */
         pre {
             background: transparent;
             color: #000000;
             padding: 0;
             margin: 0;
             font-family: "Courier New", Courier, monospace;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
+            font-size: 0.875rem;
+            white-space: pre; /* Changed back to strict pre to stop unaligned browser wrap text drops */
             min-height: 250px;
         }
         h2 {
@@ -213,7 +212,6 @@
     </div>
 
     <div class="container">
-        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -271,7 +269,6 @@
             </div>
         </div>
 
-        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -283,7 +280,6 @@
         </div>
     </div>
 
-    <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
             var startLookup = new AddyComplete(document.getElementById("startAddr"));
@@ -320,7 +316,6 @@
         }
     </script>
 
-    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
@@ -473,50 +468,46 @@
             return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
         }
 
-        // SMART INLINE WORD WRAPPER LOGIC FOR INDENTED NEW LINES
+        // REMADE BULLETPROOF LINE-WRAP ENGINE WITH COLUMN MARGIN RE-ENTRY PREVENTERS
         function formatLine(col1, col2, col3 = "") {
             const pad1 = 20; 
             const inlinePad = 15; 
-            const maxWidth = 50; // Text length baseline before forcing indentation wrap lines
+            const maxRightColumnWidth = 45; // Hard cutoff threshold to break address data cleanly
             
-            let headStr = col1.padEnd(pad1);
+            let label = col1.padEnd(pad1);
             
             if (col3) {
-                headStr += String(col2).padEnd(inlinePad) + col3;
-                return headStr.trimEnd() + "\n";
+                return label + String(col2).padEnd(inlinePad) + col3 + "\n";
             } else {
-                // Address & customer wrap check
                 let text = String(col2);
-                if (text.length <= maxWidth) {
-                    return headStr + text + "\n";
+                
+                // If it fits nicely on a single line, return it instantly
+                if (text.length <= maxRightColumnWidth) {
+                    return label + text + "\n";
                 }
                 
-                // Break long texts across multiple lines nicely
-                let result = "";
-                let firstLine = true;
-                
+                // Loop through text string and piece chunks together using a hard margin offset
+                let lines = [];
                 while (text.length > 0) {
-                    let chunk = text.substring(0, maxWidth);
+                    let chunk = text.substring(0, maxRightColumnWidth);
                     
-                    // Try to break cleanly at spaces instead of cutting words in half
-                    if (text.length > maxWidth) {
+                    if (text.length > maxRightColumnWidth) {
                         let lastSpace = chunk.lastIndexOf(" ");
-                        if (lastSpace > maxWidth * 0.6) {
+                        if (lastSpace > maxRightColumnWidth * 0.5) {
                             chunk = text.substring(0, lastSpace);
                         }
                     }
                     
-                    if (firstLine) {
-                        result += headStr + chunk.trim() + "\n";
-                        firstLine = false;
-                    } else {
-                        // Injects 20 spaces to explicitly align new block line text under column 2 start position
-                        result += "".padEnd(pad1) + chunk.trim() + "\n";
-                    }
-                    
+                    lines.push(chunk.trim());
                     text = text.substring(chunk.length).trim();
                 }
-                return result;
+                
+                // Combine row outputs forcing an explicit 20-character indent for lines 2, 3, etc.
+                let output = label + lines[0] + "\n";
+                for (let i = 1; i < lines.length; i++) {
+                    output += "".padEnd(pad1) + lines[i] + "\n";
+                }
+                return output;
             }
         }
 
