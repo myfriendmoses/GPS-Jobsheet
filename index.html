@@ -26,6 +26,8 @@
             --info-hover: #2563eb;
             --excel: #16a34a;
             --excel-hover: #15803d;
+            --email: #db2777;
+            --email-hover: #be185d;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -125,12 +127,14 @@
         }
         .button-group {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-top: 1rem;
+            flex-wrap: wrap;
         }
         .button-group button {
             margin-top: 0;
             flex: 1;
+            min-width: 130px;
         }
         .btn-danger {
             background-color: var(--danger);
@@ -143,6 +147,12 @@
         }
         .btn-excel:hover {
             background-color: var(--excel-hover);
+        }
+        .btn-email {
+            background-color: var(--email);
+        }
+        .btn-email:hover {
+            background-color: var(--email-hover);
         }
         .output-section {
             display: flex;
@@ -271,8 +281,9 @@
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
             </div>
             <div class="button-group">
-                <button id="copyBtn" onclick="copyToClipboard()">Copy to Clipboard</button>
-                <button class="btn-excel" onclick="exportToExcel()">Export to Excel</button>
+                <button id="copyBtn" onclick="copyToClipboard()">Copy Layout</button>
+                <button class="btn-excel" onclick="exportToExcel()">Export Excel</button>
+                <button class="btn-email" onclick="sendViaEmail()">Send via Email</button>
             </div>
         </div>
     </div>
@@ -519,7 +530,6 @@
             let endKmV = num('endKm');
             let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
 
-            // Calculate Pilot Mileage
             let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : `[[END KILOMETERAGE]-[START KILOMETERAGE]=]`;
             if (endKmV !== null && startKmV !== null) {
                 document.getElementById('pilotKmTotal').value = `${endKmV - startKmV} KM`;
@@ -638,7 +648,7 @@
                 try {
                     document.execCommand('copy');
                     btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
                 } catch (err) {
                     alert("Copy failed. Your browser may be blocking it. Please select the text manually.");
                 }
@@ -649,13 +659,26 @@
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(outputText).then(() => {
                     btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
                 }).catch(() => {
                     fallbackCopy(outputText);
                 });
             } else {
                 fallbackCopy(outputText);
             }
+        }
+
+        // New Native Mail Client Trigger System
+        function sendViaEmail() {
+            const uid = document.getElementById('uniqueId').value || 'Draft';
+            const customerName = document.getElementById('customer').value || 'Jobsheet';
+            const outputText = document.getElementById('output').textContent;
+            
+            const subject = encodeURIComponent(`GPS Jobsheet - ${uid} (${customerName})`);
+            const body = encodeURIComponent(outputText);
+            
+            // Fires browser link injection to hand off payload directly to default mail software
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
         function exportToExcel() {
