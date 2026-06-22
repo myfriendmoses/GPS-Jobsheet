@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Goodwin Piloting Services - Jobsheet Generator</title>
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --info: #3b82f6;
+            --info-hover: #2563eb;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .app-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .app-logo {
+            max-height: 80px;
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+        h1 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin: 0;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .form-section {
+            background: var(--surface);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .input-with-btn {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .input-with-btn input {
+            flex: 1;
+        }
+        .input-with-btn button {
+            margin-top: 0;
+            width: auto;
+            padding: 0 1rem;
+            background-color: #64748b;
+        }
+        .input-with-btn button:hover {
+            background-color: #475569;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.35rem;
+            color: #334155;
+        }
+        input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], textarea {
+            width: 100%;
+            padding: 0.65rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 1rem; 
+            background-color: #fff;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+            touch-action: manipulation;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .button-group button {
+            margin-top: 0;
+            flex: 1;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        .btn-info {
+            background-color: var(--info);
+        }
+        .btn-info:hover {
+            background-color: var(--info-hover);
+        }
+        .output-section {
+            display: flex;
+            flex-direction: column;
+        }
+        .pdf-container {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow-x: auto;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+            padding: 2rem;
+        }
+        .pdf-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+        }
+        .pdf-logo {
+            max-height: 60px;
+            width: auto;
+        }
+        pre {
+            background: transparent;
+            color: #000000;
+            padding: 0;
+            margin: 0;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            min-height: 250px;
+        }
+        h2 {
+            font-size: 1.15rem;
+            margin-top: 0;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .save-indicator {
+            font-size: 0.75rem;
+            color: #10b981;
+            font-weight: normal;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <img src="logo.png" alt="GPS Logo" class="app-logo" onerror="this.style.display='none'">
+        <h1>Goodwin Piloting Services Jobsheet</h1>
+    </div>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
+            
+            <div class="form-row">
+                <div class="form-group"><label>Date</label><input type="date" id="date"></div>
+                <div class="form-group">
+                    <label>Unique ID</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="uniqueId">
+                        <button type="button" onclick="generateRandomId(); saveInputs();">Generate</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group"><label>Customer</label><input type="text" id="customer"></div>
+            <div class="form-group"><label>Description</label><input type="text" id="description"></div>
+            <div class="form-group"><label>Start Address</label><input type="text" id="startAddr"></div>
+            <div class="form-group"><label>End Address</label><input type="text" id="endAddr"></div>
+
+            <div class="form-row">
+                <div class="form-group"><label>Base Mileage</label><input type="number" id="baseKm"></div>
+                <div class="form-group"><label>Time at Base</label><input type="datetime-local" id="timeBase"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Start Mileage</label><input type="number" id="startKm"></div>
+                <div class="form-group"><label>Time at Start</label><input type="datetime-local" id="timeStart"></div>
+            </div>
+
+            <div class="form-group"><label>Time Required</label><input type="datetime-local" id="timeReq"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Start Time</label><input type="datetime-local" id="startTime"></div>
+                <div class="form-group"><label>End Time</label><input type="datetime-local" id="endTime"></div>
+            </div>
+            <div class="form-group"><label>Standby Duration (HH:MM)</label><input type="time" id="standby"></div>
+
+            <div class="form-group"><label>End Mileage</label><input type="number" id="endKm"></div>
+            
+            <div class="form-row">
+                <div class="form-group"><label>Base Mileage (E)</label><input type="number" id="baseKmE"></div>
+                <div class="form-group"><label>Time at Base (E)</label><input type="datetime-local" id="timeBaseE"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group"><label>Pilot Time Total</label><input type="text" id="pilotTime" placeholder="Auto-calculates"></div>
+                <div class="form-group"><label>Timesheet Total</label><input type="text" id="timesheetTotal" placeholder="Auto-calculates"></div>
+            </div>
+            
+            <div class="form-group"><label>Notes</label><textarea id="notes" rows="3"></textarea></div>
+
+            <div class="button-group">
+                <button type="button" class="btn-danger" onclick="clearForm()">Clear Form</button>
+                <button type="button" onclick="generateSheet()">Generate Jobsheet</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <div class="pdf-container" id="pdfWrapper">
+                <div class="pdf-header" id="pdfHeader">
+                    <img src="logo.png" alt="GPS Logo" class="pdf-logo">
+                </div>
+                <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
+            </div>
+            <div class="button-group">
+                <button id="copyBtn" onclick="copyToClipboard()">Copy to Clipboard</button>
+                <button class="btn-info" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let saveTimeout;
+
+        // Register Inline Service Worker for Offline PWA Capabilities
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
+        window.onload = function() {
+            loadInputs();
+            if (!document.getElementById('uniqueId').value) {
+                generateRandomId();
+            }
+
+            const allInputs = document.querySelectorAll('input, textarea');
+            allInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    saveInputs();
+                    showSaveIndicator();
+                });
+            });
+        };
+
+        function saveInputs() {
+            const data = {};
+            document.querySelectorAll('input, textarea').forEach(input => {
+                data[input.id] = input.value;
+            });
+            localStorage.setItem('gps_jobsheet_data', JSON.stringify(data));
+        }
+
+        function loadInputs() {
+            const savedData = localStorage.getItem('gps_jobsheet_data');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (const id in data) {
+                    const el = document.getElementById(id);
+                    if (el) { el.value = data[id]; }
+                }
+            }
+        }
+
+        function clearForm() {
+            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+                localStorage.removeItem('gps_jobsheet_data');
+                document.querySelectorAll('input, textarea').forEach(input => {
+                    input.value = '';
+                });
+                generateRandomId();
+                document.getElementById('output').textContent = 'Fill out the form and click "Generate Jobsheet" to see the output here.';
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.opacity = '1';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { indicator.style.opacity = '0'; }, 1500);
+        }
+
+        function generateRandomId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let id = 'GPS-';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('uniqueId').value = id;
+        }
+
+        function roundInputTime(id) {
+            const input = document.getElementById(id);
+            if (!input || !input.value) return;
+            
+            const v = input.value;
+            const isDateTime = v.includes('T');
+            
+            if (isDateTime) {
+                const dateObj = new Date(v);
+                const minutes = dateObj.getMinutes();
+                const roundedMinutes = Math.round(minutes / 15) * 15;
+                dateObj.setMinutes(roundedMinutes);
+                
+                const yyyy = dateObj.getFullYear();
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                const hh = String(dateObj.getHours()).padStart(2, '0');
+                const min = String(dateObj.getMinutes()).padStart(2, '0');
+                input.value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            } else {
+                const [hours, minutes] = v.split(':').map(Number);
+                let roundedMinutes = Math.round(minutes / 15) * 15;
+                let newHours = hours;
+                
+                if (roundedMinutes === 60) {
+                    roundedMinutes = 0;
+                    newHours += 1;
+                }
+                if (newHours >= 24) newHours = 0;
+                
+                input.value = `${String(newHours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+            }
+            saveInputs();
+        }
+
+        function val(id) {
+            const v = document.getElementById(id).value;
+            return v ? v : `[${id.toUpperCase().replace('ADDR', 'ADDRESS').replace('REQ', 'REQUIRED').replace('KM', ' KILOMETERAGE')}]`;
+        }
+
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('blur', (e) => {
+                if(['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'].includes(e.target.id)) {
+                    roundInputTime(e.target.id);
+                }
+            });
+        });
+
+        function num(id) {
+            const v = document.getElementById(id).value;
+            return v ? parseFloat(v) : null;
+        }
+
+        function formatDate(id) {
+            const v = document.getElementById(id).value;
+            if (!v) return `[${id.toUpperCase()}]`;
+            const parts = v.split('-'); 
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function formatDateTime(id) {
+            const v = document.getElementById(id).value;
+            if (!v) return `[${id.toUpperCase()} DDMMYYYY HH:MM]`;
+            const [datePart, timePart] = v.split('T');
+            const dateParts = datePart.split('-');
+            return `${dateParts[2]}${dateParts[1]}${dateParts[0]} ${timePart}`;
+        }
+
+        function formatLine(col1, col2, col3 = "") {
+            const pad1 = 20; 
+            const inlinePad = 12; 
+            let str = col1.padEnd(pad1);
+            if (col3) {
+                str += String(col2).padEnd(inlinePad) + col3;
+            } else {
+                str += col2;
+            }
+            return str.trimEnd() + "\n";
+        }
+
+        function generateSheet() {
+            const timeFields = ['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'];
+            timeFields.forEach(id => roundInputTime(id));
+
+            let startKmV = num('startKm');
+            let baseKmV = num('baseKm');
+            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV).toString() : `[[START KILOMETERAGE]-[BASE KILOMETERAGE]=]`;
+            
+            let baseKmEV = num('baseKmE');
+            let endKmV = num('endKm');
+            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV).toString() : `[[BASE KILOMETERAGE (E)]-[END KILOMETERAGE]=]`;
+
+            const startT = document.getElementById('startTime').value;
+            const endT = document.getElementById('endTime').value;
+            const sbyT = document.getElementById('standby').value;
+
+            if (startT && endT) {
+                const startDate = new Date(startT);
+                const endDate = new Date(endT);
+                let diffMs = endDate - startDate;
+                if (diffMs >= 0) {
+                    if (sbyT) {
+                        const [hours, minutes] = sbyT.split(':').map(Number);
+                        const standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                        diffMs -= standbyMs;
+                    }
+                    if (diffMs < 0) diffMs = 0;
+                    const decimalHours = diffMs / (1000 * 60 * 60);
+                    document.getElementById('pilotTime').value = decimalHours.toFixed(2) + ' hrs'; 
+                    saveInputs();
+                }
+            }
+            let pilotTimeVal = document.getElementById('pilotTime').value || `[([END TIME DDMMYYYY HH:MM]-[START TIME DDMMYYYY HH:MM])-[STANDBY HH:MM]*24=]`;
+
+            const tbStart = document.getElementById('timeBase').value;
+            const tbEnd = document.getElementById('timeBaseE').value;
+
+            if (tbStart && tbEnd) {
+                const startDate = new Date(tbStart);
+                const endDate = new Date(tbEnd);
+                let diffMs = endDate - startDate;
+                if (diffMs >= 0) {
+                    const decimalHours = diffMs / (1000 * 60 * 60);
+                    document.getElementById('timesheetTotal').value = decimalHours.toFixed(2) + ' hrs';
+                    saveInputs();
+                }
+            }
+            let tsTotalVal = document.getElementById('timesheetTotal').value || `[([TIME AT BASE (E)]-[TIME AT BASE])*24=]`;
+
+            let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
+            txt += formatDate('date').padEnd(20) + val('uniqueId') + "\n\n";
+            txt += formatLine("CUSTOMER", val('customer'));
+            txt += formatLine("DESCRIPTION", val('description')) + "\n";
+            txt += formatLine("START ADDRESS", val('startAddr'));
+            txt += formatLine("END ADDRESS", val('endAddr')) + "\n";
+            txt += formatLine("BASE MILEAGE", val('baseKm'), formatDateTime('timeBase'));
+            txt += formatLine("START MILEAGE", val('startKm'), formatDateTime('timeStart')) + "\n";
+            txt += formatLine("TIME REQUIRED", formatDateTime('timeReq'));
+            txt += formatLine("START TIME", formatDateTime('startTime'));
+            txt += formatLine("END TIME", formatDateTime('endTime'));
+            txt += formatLine("STANDBY", val('standby')) + "\n";
+            txt += formatLine("END MILEAGE", val('endKm'), formatDateTime('endTime'));
+            txt += formatLine("BASE MILEAGE", val('baseKmE'), formatDateTime('timeBaseE')) + "\n";
+            txt += formatLine("PILOT TIME SHEET", `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}`) + "\n";
+            txt += "TOTALS\n";
+            txt += formatLine("BASE TO START", baseToStartCalc);
+            txt += formatLine("PILOT TIME", pilotTimeVal);
+            txt += formatLine("TIMESHEET TOTAL", tsTotalVal);
+            txt += formatLine("END TO BASE", endToBaseCalc) + "\n";
+            txt += formatLine("NOTES", val('notes'));
+
+            document.getElementById('output').textContent = txt;
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('output').textContent;
+            navigator.clipboard.writeText(outputText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = "Copied!";
+                setTimeout(() => { btn.textContent = "Copy to Clipboard"; }, 2000);
+            });
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdfWrapper');
+            const header = document.getElementById('pdfHeader');
+            const uid = document.getElementById('uniqueId').value || 'Draft';
+            header.style.display = 'block';
+            const opt = {
+                margin:       10,
+                filename:     `Jobsheet_${uid}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save().then(() => {
+                header.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
