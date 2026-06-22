@@ -157,16 +157,14 @@
             margin-bottom: 1rem;
             padding: 2rem;
         }
-        
-        /* Updated typography settings to guarantee alignment */
         pre {
             background: transparent;
             color: #000000;
             padding: 0;
             margin: 0;
             font-family: "Courier New", Courier, monospace;
-            font-size: 0.875rem;
-            white-space: pre; /* Changed back to strict pre to stop unaligned browser wrap text drops */
+            font-size: 0.85rem;
+            white-space: pre; 
             min-height: 250px;
         }
         h2 {
@@ -299,6 +297,7 @@
                 }
                 saveInputs(); 
                 showSaveIndicator(); 
+                generateSheet(); // FIXED: Force immediate text generation on lookup selection
             });
 
             endLookup.on("selection", (data) => {
@@ -312,6 +311,7 @@
                 }
                 saveInputs(); 
                 showSaveIndicator(); 
+                generateSheet(); // FIXED: Force immediate text generation on lookup selection
             });
         }
     </script>
@@ -343,10 +343,12 @@
                     showSaveIndicator();
                 });
             });
+            
+            // Generate initial sheet layout if data was restored from cache
+            if(document.getElementById('customer').value) {
+                generateSheet();
+            }
         };
-
-        document.getElementById("startAddr").addEventListener("change", saveInputs);
-        document.getElementById("endAddr").addEventListener("change", saveInputs);
 
         function saveInputs() {
             const data = {};
@@ -459,6 +461,7 @@
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        // Output short year format: HH:MM DDMMYY
         function formatDateTime(id) {
             const v = document.getElementById(id).value;
             if (!v) return '';
@@ -468,11 +471,11 @@
             return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
         }
 
-        // REMADE BULLETPROOF LINE-WRAP ENGINE WITH COLUMN MARGIN RE-ENTRY PREVENTERS
+        // Custom string layout wrapper engine with explicit spacing indents
         function formatLine(col1, col2, col3 = "") {
             const pad1 = 20; 
             const inlinePad = 15; 
-            const maxRightColumnWidth = 45; // Hard cutoff threshold to break address data cleanly
+            const maxRightColumnWidth = 40; // Reduced cutoff safely to give smaller phone displays breathing room
             
             let label = col1.padEnd(pad1);
             
@@ -481,19 +484,17 @@
             } else {
                 let text = String(col2);
                 
-                // If it fits nicely on a single line, return it instantly
                 if (text.length <= maxRightColumnWidth) {
                     return label + text + "\n";
                 }
                 
-                // Loop through text string and piece chunks together using a hard margin offset
                 let lines = [];
                 while (text.length > 0) {
                     let chunk = text.substring(0, maxRightColumnWidth);
                     
                     if (text.length > maxRightColumnWidth) {
                         let lastSpace = chunk.lastIndexOf(" ");
-                        if (lastSpace > maxRightColumnWidth * 0.5) {
+                        if (lastSpace > maxRightColumnWidth * 0.4) {
                             chunk = text.substring(0, lastSpace);
                         }
                     }
@@ -502,7 +503,6 @@
                     text = text.substring(chunk.length).trim();
                 }
                 
-                // Combine row outputs forcing an explicit 20-character indent for lines 2, 3, etc.
                 let output = label + lines[0] + "\n";
                 for (let i = 1; i < lines.length; i++) {
                     output += "".padEnd(pad1) + lines[i] + "\n";
