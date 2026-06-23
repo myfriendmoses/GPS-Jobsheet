@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
-    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
     <style>
@@ -228,6 +226,7 @@
             flex-grow: 1;
             margin-bottom: 1rem;
             padding: 1.25rem;
+            max-width: 100%; /* Force strict viewport boundaries */
         }
         pre {
             background: transparent;
@@ -260,36 +259,42 @@
             width: 100% !important;
         }
 
+        /* CRITICAL RESPONSIVE REWRITE - ABSOLUTE STACK ON MOBILE VIEWPORTS */
         @media (max-width: 1024px) {
+            body {
+                padding: 0.5rem;
+            }
             .container {
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            .form-section, .output-section {
-                width: 100%;
+            .form-section {
+                padding: 0.75rem; /* Tighten boundaries */
             }
             .form-row {
-                flex-direction: column;
+                flex-direction: column; /* Force multi-input lines to stack straight vertically */
                 gap: 0;
             }
-            body {
-                padding: 0.5rem;
+            .form-row .form-group {
+                width: 100%;
+                margin-bottom: 1rem;
             }
             .output-wrapper {
-                padding: 1rem;
+                padding: 0.75rem;
+            }
+            pre {
+                font-size: 0.75rem; /* Slightly scale typography down for safe small screen tracking */
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Prerequisite Gate Overlay Screen Wrapper -->
     <div id="installGateOverlay">
         <div class="gate-card">
             <h2>Mobile Installation Required</h2>
             <p>To ensure total offline availability and continuous background auto-saving during pilot transit operations, this application must be added to your mobile home screen first.</p>
             
-            <!-- Apple Safari Instructions Block -->
             <div id="appleInstructions" class="instruction-box">
                 <h3>Apple iOS (Safari) Instructions:</h3>
                 <ol>
@@ -299,7 +304,6 @@
                 </ol>
             </div>
 
-            <!-- Android Chrome/Edge Instructions Block -->
             <div id="androidInstructions" class="instruction-box">
                 <h3>Android (Chrome / Edge) Instructions:</h3>
                 <ol>
@@ -321,7 +325,6 @@
     </div>
 
     <div class="container">
-        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -378,7 +381,6 @@
             </div>
         </div>
 
-        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
                 <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
@@ -390,7 +392,6 @@
         </div>
     </div>
 
-    <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
             var startLookup = new AddyComplete(document.getElementById("startAddr"));
@@ -429,7 +430,6 @@
         }
     </script>
 
-    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
@@ -446,10 +446,9 @@
             navigator.serviceWorker.register(URL.createObjectURL(blob));
         }
 
-        // 2. Mobile Condition Validation & Manual Instruction Display Engine
+        // 2. Mobile Condition Validation
         function checkStandaloneMode() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
             if (!isMobile) {
                 gateOverlay.style.display = 'none';
                 return;
@@ -460,7 +459,6 @@
                 gateOverlay.style.display = 'none'; 
             } else {
                 gateOverlay.style.display = 'flex'; 
-                
                 if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
                     document.getElementById('appleInstructions').style.display = 'block';
                 } else {
@@ -471,7 +469,6 @@
 
         window.onload = function() {
             checkStandaloneMode(); 
-            
             loadInputs();
             if (!document.getElementById('uniqueId').value) {
                 generateRandomId();
@@ -514,313 +511,4 @@
             return v ? `${v} KM` : 'NULL';
         }
 
-        function clearForm() {
-            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-                localStorage.removeItem('gps_jobsheet_data');
-                document.querySelectorAll('input, textarea').forEach(input => {
-                    input.value = '';
-                });
-                generateRandomId();
-                document.getElementById('output').textContent = 'Fill out the form and click "Generate Jobsheet" to see the output here.';
-            }
-        }
-
-        function showSaveIndicator() {
-            const indicator = document.getElementById('saveIndicator');
-            indicator.style.opacity = '1';
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { indicator.style.opacity = '0'; }, 1500);
-        }
-
-        function generateRandomId() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let id = 'GPS-';
-            for (let i = 0; i < 6; i++) {
-                id += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('uniqueId').value = id;
-        }
-
-        // Automatic logic sets timestamps to closest 15-minute mark
-        function roundInputTime(id) {
-            const input = document.getElementById(id);
-            if (!input || !input.value) return;
-            
-            const v = input.value;
-            const isDateTime = v.includes('T');
-            
-            if (isDateTime) {
-                const dateObj = new Date(v);
-                const minutes = dateObj.getMinutes();
-                const roundedMinutes = Math.round(minutes / 15) * 15;
-                dateObj.setMinutes(roundedMinutes);
-                
-                const yyyy = dateObj.getFullYear();
-                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const dd = String(dateObj.getDate()).padStart(2, '0');
-                const hh = String(dateObj.getHours()).padStart(2, '0');
-                const min = String(dateObj.getMinutes()).padStart(2, '0');
-                input.value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-            } else {
-                const [hours, minutes] = v.split(':').map(Number);
-                let roundedMinutes = Math.round(minutes / 15) * 15;
-                let newHours = hours;
-                
-                if (roundedMinutes === 60) {
-                    roundedMinutes = 0;
-                    newHours += 1;
-                }
-                if (newHours >= 24) newHours = 0;
-                
-                input.value = `${String(newHours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
-            }
-            saveInputs();
-        }
-
-        function val(id) {
-            const v = document.getElementById(id).value;
-            return v ? v : 'NULL';
-        }
-
-        document.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('blur', (e) => {
-                if(['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'].includes(e.target.id)) {
-                    roundInputTime(e.target.id);
-                }
-            });
-        });
-
-        function num(id) {
-            const v = document.getElementById(id).value;
-            return v ? parseFloat(v) : null;
-        }
-
-        function formatDate(id) {
-            const v = document.getElementById(id).value;
-            if (!v) return 'NULL';
-            const parts = v.split('-'); 
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
-        function formatDateTime(id) {
-            const v = document.getElementById(id).value;
-            if (!v) return 'NULL';
-            const [datePart, timePart] = v.split('T');
-            const dateParts = datePart.split('-'); 
-            const shortYear = dateParts[0].slice(-2); 
-            return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
-        }
-
-        function formatLine(col1, col2, col3 = "") {
-            const pad1 = 20; 
-            const inlinePad = 15; 
-            const maxRightColumnWidth = 40; 
-            
-            let label = col1.padEnd(pad1);
-            
-            if (col3) {
-                return label + String(col2).padEnd(inlinePad) + col3 + "\n";
-            } else {
-                let text = String(col2);
-                
-                if (text.length <= maxRightColumnWidth) {
-                    return label + text + "\n";
-                }
-                
-                let lines = [];
-                while (text.length > 0) {
-                    let chunk = text.substring(0, maxRightColumnWidth);
-                    
-                    if (text.length > maxRightColumnWidth) {
-                        let lastSpace = chunk.lastIndexOf(" ");
-                        if (lastSpace > maxRightColumnWidth * 0.4) {
-                            chunk = text.substring(0, lastSpace);
-                        }
-                    }
-                    
-                    lines.push(chunk.trim());
-                    text = text.substring(chunk.length).trim();
-                }
-                
-                let output = label + lines[0] + "\n";
-                for (let i = 1; i < lines.length; i++) {
-                    output += "".padEnd(pad1) + lines[i] + "\n";
-                }
-                return output;
-            }
-        }
-
-        function generateSheet() {
-            const timeFields = ['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'];
-            timeFields.forEach(id => roundInputTime(id));
-
-            let startKmV = num('startKm');
-            let baseKmV = num('baseKm');
-            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : 'NULL';
-            
-            let baseKmEV = num('baseKmE');
-            let endKmV = num('endKm');
-            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : 'NULL';
-
-            let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : 'NULL';
-            if (endKmV !== null && startKmV !== null) {
-                document.getElementById('pilotKmTotal').value = `${endKmV - startKmV} KM`;
-            } else {
-                document.getElementById('pilotKmTotal').value = '';
-            }
-
-            const startT = document.getElementById('startTime').value;
-            const endT = document.getElementById('endTime').value;
-            const sbyT = document.getElementById('standby').value;
-
-            let pilotTimeVal = 'NULL';
-            if (startT && endT) {
-                const startDate = new Date(startT);
-                const endDate = new Date(endT);
-                let diffMs = endDate - startDate;
-                if (diffMs >= 0) {
-                    if (sbyT) {
-                        const [hours, minutes] = sbyT.split(':').map(Number);
-                        const standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
-                        diffMs -= standbyMs;
-                    }
-                    if (diffMs < 0) diffMs = 0;
-                    const decimalHours = diffMs / (1000 * 60 * 60);
-                    pilotTimeVal = decimalHours.toFixed(2) + ' hrs';
-                    document.getElementById('pilotTime').value = pilotTimeVal; 
-                    saveInputs();
-                }
-            } else {
-                document.getElementById('pilotTime').value = '';
-            }
-
-            const tbStart = document.getElementById('timeBase').value;
-            const tbEnd = document.getElementById('timeBaseE').value;
-
-            let tsTotalVal = 'NULL';
-            if (tbStart && tbEnd) {
-                const startDate = new Date(tbStart);
-                const endDate = new Date(tbEnd);
-                let diffMs = endDate - startDate;
-                if (diffMs >= 0) {
-                    const decimalHours = diffMs / (1000 * 60 * 60);
-                    tsTotalVal = decimalHours.toFixed(2) + ' hrs';
-                    document.getElementById('timesheetTotal').value = tsTotalVal;
-                    saveInputs();
-                }
-            } else {
-                document.getElementById('timesheetTotal').value = '';
-            }
-
-            const tReq = document.getElementById('timeReq').value;
-            const sTime = document.getElementById('startTime').value;
-
-            let standbyTotalVal = 'NULL';
-            if ((tReq && sTime) || sbyT) {
-                let diffMs = 0;
-                if (tReq && sTime) {
-                    const dateReq = new Date(tReq);
-                    const dateStart = new Date(sTime);
-                    diffMs = dateStart - dateReq;
-                    if (diffMs < 0) diffMs = 0; 
-                }
-
-                let standbyMs = 0;
-                if (sbyT) {
-                    const [hours, minutes] = sbyT.split(':').map(Number);
-                    standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
-                }
-
-                const totalStandbyMs = diffMs + standbyMs;
-                const decimalHours = totalStandbyMs / (1000 * 60 * 60);
-                standbyTotalVal = decimalHours.toFixed(2) + ' hrs';
-                document.getElementById('standbyTotal').value = standbyTotalVal;
-                saveInputs();
-            } else {
-                document.getElementById('standbyTotal').value = '';
-            }
-
-            let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
-            txt += (formatDate('date') !== 'NULL' ? formatDate('date').padEnd(20) : 'NULL                ') + val('uniqueId') + "\n\n";
-            txt += formatLine("CUSTOMER", val('customer'));
-            txt += formatLine("DESCRIPTION", val('description')) + "\n";
-            txt += formatLine("START ADDRESS", val('startAddr'));
-            txt += formatLine("END ADDRESS", val('endAddr')) + "\n";
-            
-            txt += formatLine("BASE MILEAGE", valKm('baseKm'), formatDateTime('timeBase'));
-            txt += formatLine("START MILEAGE", valKm('startKm'), formatDateTime('timeStart')) + "\n";
-            
-            txt += formatLine("TIME REQUIRED", formatDateTime('timeReq'));
-            txt += formatLine("START TIME", formatDateTime('startTime'));
-            txt += formatLine("END TIME", formatDateTime('endTime'));
-            txt += formatLine("STANDBY", val('standby'));
-            
-            txt += formatLine("END MILEAGE", valKm('endKm'), formatDateTime('endTime'));
-            txt += formatLine("BASE MILEAGE", valKm('baseKmE'), formatDateTime('timeBaseE')) + "\n";
-            
-            txt += formatLine("PILOT TIME SHEET", (formatDateTime('timeBase') !== 'NULL' && formatDateTime('timeBaseE') !== 'NULL') ? `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}` : 'NULL') + "\n";
-            
-            txt += "TOTALS\n";
-            txt += formatLine("BASE TO START", baseToStartCalc);
-            txt += formatLine("PILOT TIME", pilotTimeVal);
-            txt += formatLine("STANDBY TOTAL", standbyTotalVal);
-            txt += formatLine("PILOT MILEAGE", pilotKmCalc);
-            txt += formatLine("END TO BASE", endToBaseCalc);
-            txt += formatLine("TIMESHEET TOTAL", tsTotalVal) + "\n";
-            
-            txt += formatLine("NOTES", val('notes'));
-
-            document.getElementById('output').textContent = txt;
-        }
-
-        function copyToClipboard() {
-            const outputText = document.getElementById('output').textContent;
-            const btn = document.getElementById('copyBtn');
-            
-            const fallbackCopy = (text) => {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.top = "0";
-                textArea.style.left = "0";
-                textArea.style.position = "fixed";
-
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-
-                try {
-                    document.execCommand('copy');
-                    btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
-                } catch (err) {
-                    alert("Copy failed. Your browser may be blocking it. Please select the text manually.");
-                }
-                
-                document.body.removeChild(textArea);
-            };
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(outputText).then(() => {
-                    btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
-                }).catch(() => {
-                    fallbackCopy(outputText);
-                });
-            } else {
-                fallbackCopy(outputText);
-            }
-        }
-
-        function sendViaEmail() {
-            const uid = document.getElementById('uniqueId').value || 'Draft';
-            const customerName = document.getElementById('customer').value || 'Jobsheet';
-            const outputText = document.getElementById('output').textContent;
-            
-            const subject = encodeURIComponent(`GPS Jobsheet - ${uid} (${customerName})`);
-            const body = encodeURIComponent(outputText);
-            
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
-        }
-    </script>
-</body>
-</html>
+        ...
