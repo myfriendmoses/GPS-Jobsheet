@@ -13,9 +13,6 @@
     <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
-    <!-- SheetJS Library for Excel Exporting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
     <style>
         :root {
             --primary: #2563eb;
@@ -27,8 +24,6 @@
             --danger-hover: #dc2626;
             --info: #3b82f6;
             --info-hover: #2563eb;
-            --excel: #16a34a;
-            --excel-hover: #15803d;
             --email: #db2777;
             --email-hover: #be185d;
         }
@@ -120,7 +115,6 @@
             margin: 0;
         }
         
-        /* Desktop Default side-by-side layout layout */
         .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -215,12 +209,6 @@
         .btn-danger:hover {
             background-color: var(--danger-hover);
         }
-        .btn-excel {
-            background-color: var(--excel);
-        }
-        .btn-excel:hover {
-            background-color: var(--excel-hover);
-        }
         .btn-email {
             background-color: var(--email);
         }
@@ -272,7 +260,6 @@
             width: 100% !important;
         }
 
-        /* FIXED RESPONSIVE MEDIA BREAKPOINT (STACK LAYOUT ON MOBILE TO PREVENT CLIPPING) */
         @media (max-width: 1024px) {
             .container {
                 grid-template-columns: 1fr;
@@ -398,7 +385,6 @@
             </div>
             <div class="button-group">
                 <button id="copyBtn" onclick="copyToClipboard()">Copy Layout</button>
-                <button class="btn-excel" onclick="exportToExcel()">Export Excel</button>
                 <button class="btn-email" onclick="sendViaEmail()">Send via Email</button>
             </div>
         </div>
@@ -555,6 +541,7 @@
             document.getElementById('uniqueId').value = id;
         }
 
+        // Automatic logic sets timestamps to closest 15-minute mark
         function roundInputTime(id) {
             const input = document.getElementById(id);
             if (!input || !input.value) return;
@@ -608,7 +595,6 @@
             return v ? parseFloat(v) : null;
         }
 
-        // Fix date format string to prevent out of bounds
         function formatDate(id) {
             const v = document.getElementById(id).value;
             if (!v) return 'NULL';
@@ -834,61 +820,6 @@
             const body = encodeURIComponent(outputText);
             
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
-        }
-
-        function exportToExcel() {
-            const uid = document.getElementById('uniqueId').value || 'Draft';
-            
-            let startKmV = num('startKm');
-            let baseKmV = num('baseKm');
-            let baseToStart = (startKmV !== null && baseKmV !== null) ? (startKmV - baseKmV) : null;
-            
-            let baseKmEV = num('baseKmE');
-            let endKmV = num('endKm');
-            let endToBase = (baseKmEV !== null && endKmV !== null) ? (baseKmEV - endKmV) : null;
-            let pilotKm = (endKmV !== null && startKmV !== null) ? (endKmV - startKmV) : null;
-
-            const rowData = [
-                ["Field", "Value / Start Metric", "End Metric / Context"],
-                ["Jobsheet ID", uid, ""],
-                ["Date", formatDate('date') !== 'NULL' ? formatDate('date') : "NULL", ""],
-                ["Customer", val('customer'), ""],
-                ["Description", val('description'), ""],
-                ["Start Address", val('startAddr'), ""],
-                ["End Address", val('endAddr'), ""],
-                ["", "", ""], 
-                ["MILEAGE & TIME LOGS", "", ""],
-                ["Base Mileage", valKm('baseKm'), formatDateTime('timeBase')],
-                ["Start Mileage", valKm('startKm'), formatDateTime('timeStart')],
-                ["Time Required", formatDateTime('timeReq'), ""],
-                ["Start Time", formatDateTime('startTime'), ""],
-                ["End Time", formatDateTime('endTime'), ""],
-                ["Standby Input", val('standby'), ""],
-                ["End Mileage", valKm('endKm'), formatDateTime('endTime')],
-                ["Base Mileage (E)", valKm('baseKmE'), formatDateTime('timeBaseE')],
-                ["", "", ""], 
-                ["CALCULATED TOTALS", "", ""],
-                ["Base to Start", baseToStart !== null ? `${baseToStart} KM` : 'NULL', ""],
-                ["Pilot Time", val('pilotTime') || 'NULL', ""],
-                ["Standby Total", val('standbyTotal') || 'NULL', ""],
-                ["Pilot Mileage", pilotKm !== null ? `${pilotKm} KM` : 'NULL', ""],
-                ["End to Base", endToBase !== null ? `${endToBase} KM` : 'NULL', ""],
-                ["Timesheet Total", val('timesheetTotal') || 'NULL', ""],
-                ["", "", ""],
-                ["Notes", val('notes'), ""]
-            ];
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(rowData);
-
-            ws['!cols'] = [
-                { wch: 22 }, 
-                { wch: 45 }, 
-                { wch: 25 }  
-            ];
-
-            XLSX.utils.book_append_sheet(wb, ws, "Jobsheet Summary");
-            XLSX.writeFile(wb, `Jobsheet_${uid}.xlsx`);
         }
     </script>
 </body>
