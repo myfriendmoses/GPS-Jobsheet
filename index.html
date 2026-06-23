@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
+    <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
     <style>
@@ -111,7 +113,6 @@
             color: var(--primary);
         }
         
-        /* Layout Framework containers */
         .container {
             display: flex;
             flex-direction: row;
@@ -259,7 +260,6 @@
             width: 100% !important;
         }
 
-        /* 🚨 ABSOLUTE FIX FOR MOBILE DEVICES - HARD OVERRIDE SIDE-BY-SIDE ISSUES 🚨 */
         @media (max-width: 900px) {
             body {
                 padding: 0.5rem;
@@ -272,7 +272,6 @@
                 width: 100% !important;
                 display: block !important;
             }
-            /* Force every row row layout helper to smash flat */
             .form-row {
                 display: block !important;
                 width: 100% !important;
@@ -291,18 +290,20 @@
                 max-width: 100% !important;
             }
             pre {
-                font-size: 0.72rem; /* Pull down typography just enough to secure phone margins */
+                font-size: 0.72rem;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- Prerequisite Gate Overlay Screen Wrapper -->
     <div id="installGateOverlay">
         <div class="gate-card">
             <h2>Mobile Installation Required</h2>
             <p>To ensure total offline availability and continuous background auto-saving during pilot transit operations, this application must be added to your mobile home screen first.</p>
             
+            <!-- Apple Safari Instructions Block -->
             <div id="appleInstructions" class="instruction-box">
                 <h3>Apple iOS (Safari) Instructions:</h3>
                 <ol>
@@ -312,6 +313,7 @@
                 </ol>
             </div>
 
+            <!-- Android Chrome/Edge Instructions Block -->
             <div id="androidInstructions" class="instruction-box">
                 <h3>Android (Chrome / Edge) Instructions:</h3>
                 <ol>
@@ -333,6 +335,7 @@
     </div>
 
     <div class="container">
+        <!-- Input Form -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
@@ -389,9 +392,11 @@
             </div>
         </div>
 
+        <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
-                <pre id="output">Fill out the form and click "Generate Jobsheet" to see the output here.</pre>
+                <!-- FIXED: Shorter placeholder text stops layout blowouts before generation runs -->
+                <pre id="output">Ready to generate...</pre>
             </div>
             <div class="button-group">
                 <button id="copyBtn" onclick="copyToClipboard()">Copy Layout</button>
@@ -400,6 +405,7 @@
         </div>
     </div>
 
+    <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
             var startLookup = new AddyComplete(document.getElementById("startAddr"));
@@ -438,6 +444,7 @@
         }
     </script>
 
+    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
@@ -505,7 +512,6 @@
             localStorage.setItem('gps_jobsheet_data', JSON.stringify(data));
         }
 
-        // Recover saved data structures safely from local database slots
         function loadInputs() {
             const savedData = localStorage.getItem('gps_jobsheet_data');
             if (savedData) {
@@ -529,7 +535,7 @@
                     input.value = '';
                 });
                 generateRandomId();
-                document.getElementById('output').textContent = 'Fill out the form and click "Generate Jobsheet" to see the output here.';
+                document.getElementById('output').textContent = 'Ready to generate...';
             }
         }
 
