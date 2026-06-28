@@ -353,6 +353,22 @@
             <div class="form-group"><label>Customer</label><input type="text" id="customer"></div>
             <div class="form-group"><label>Description</label><input type="text" id="description"></div>
             
+            <!-- Customer Order Label -->
+            <div class="form-group">
+                <label>Customer Order Number</label>
+                <input type="text" id="customerOrder" placeholder="e.g. PO12345">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>OPIA Permit</label>
+                    <input type="text" id="opiaPermit" placeholder="Enter OPIA Permit">
+                </div>
+                <div class="form-group">
+                    <label>Rail Permit</label>
+                    <input type="text" id="railPermit" placeholder="Enter Rail Permit">
+                </div>
+            </div>
+            
             <div class="form-group"><label>Start Address</label><input type="text" id="startAddr" placeholder="Search start address..." auto-complete></div>
             <div class="form-group"><label>End Address</label><input type="text" id="endAddr" placeholder="Search end address..." auto-complete></div>
 
@@ -395,7 +411,6 @@
         <!-- Output Display -->
         <div class="output-section">
             <div class="output-wrapper" id="outputWrapper">
-                <!-- FIXED: Shorter placeholder text stops layout blowouts before generation runs -->
                 <pre id="output">Ready to generate...</pre>
             </div>
             <div class="button-group">
@@ -408,13 +423,8 @@
     <!-- Callback Initializer for Addy Autocomplete Engine -->
     <script type="text/javascript">
         function initAddy() {
-            var startLookup = new AddyComplete(document.getElementById("startAddr"));
-            startLookup.options.excludePostBox = false;
-
-            var endLookup = new AddyComplete(document.getElementById("endAddr"));
-            endLookup.options.excludePostBox = false;
-
-            startLookup.on("selection", (data) => {
+            // Function to handle autocomplete selections defensively
+            const handleStartSelection = (data) => {
                 if (data && data.address) {
                     let fullParts = [data.address.address1];
                     if (data.address.address2) fullParts.push(data.address.address2);
@@ -426,9 +436,9 @@
                 saveInputs(); 
                 showSaveIndicator(); 
                 generateSheet();
-            });
+            };
 
-            endLookup.on("selection", (data) => {
+            const handleEndSelection = (data) => {
                 if (data && data.address) {
                     let fullParts = [data.address.address1];
                     if (data.address.address2) fullParts.push(data.address.address2);
@@ -440,7 +450,27 @@
                 saveInputs(); 
                 showSaveIndicator(); 
                 generateSheet();
+            };
+
+            // Initialize options and pass onSelection callbacks directly as part of options.
+            // This is safer across differing versions of addy.min.js
+            var startLookup = new AddyComplete(document.getElementById("startAddr"), {
+                excludePostBox: false,
+                onSelection: handleStartSelection
             });
+
+            var endLookup = new AddyComplete(document.getElementById("endAddr"), {
+                excludePostBox: false,
+                onSelection: handleEndSelection
+            });
+
+            // Defensive binding backup if the instance does support standard event registries
+            if (typeof startLookup.on === 'function') {
+                startLookup.on("selection", handleStartSelection);
+            }
+            if (typeof endLookup.on === 'function') {
+                endLookup.on("selection", handleEndSelection);
+            }
         }
     </script>
 
@@ -451,14 +481,21 @@
         let saveTimeout;
         const gateOverlay = document.getElementById('installGateOverlay');
 
-        // 1. Service Worker initialization
+        // 1. Service Worker initialization (Wrapped safely with Promise error handling to prevent sandbox rejections)
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
+            try {
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+                `;
+                const blob = new Blob([swCode], {type: 'application/javascript'});
+                const blobUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(blobUrl)
+                    .then(reg => console.log('ServiceWorker registered with scope:', reg.scope))
+                    .catch(err => console.warn('Service Worker registration skipped or failed:', err));
+            } catch (e) {
+                console.warn('Service Worker configuration rejected in this context:', e);
+            }
         }
 
         // 2. Mobile Condition Validation
@@ -496,6 +533,7 @@
                 input.addEventListener('input', () => {
                     saveInputs();
                     showSaveIndicator();
+                    generateSheet(); // Updates live output on change
                 });
             });
             
@@ -504,6 +542,7 @@
             }
         };
 
+        // Standard save, load, and clear mechanisms
         function saveInputs() {
             const data = {};
             document.querySelectorAll('input, textarea').forEach(input => {
@@ -599,6 +638,7 @@
             el.addEventListener('blur', (e) => {
                 if(['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'].includes(e.target.id)) {
                     roundInputTime(e.target.id);
+                    generateSheet();
                 }
             });
         });
@@ -757,6 +797,11 @@
             txt += (formatDate('date') !== 'NULL' ? formatDate('date').padEnd(20) : 'NULL                ') + val('uniqueId') + "\n\n";
             txt += formatLine("CUSTOMER", val('customer'));
             txt += formatLine("DESCRIPTION", val('description')) + "\n";
+            
+            txt += formatLine("CUST ORDER NO", val('customerOrder'));
+            txt += formatLine("OPIA PERMIT", val('opiaPermit'));
+            txt += formatLine("RAIL PERMIT", val('railPermit')) + "\n";
+            
             txt += formatLine("START ADDRESS", val('startAddr'));
             txt += formatLine("END ADDRESS", val('endAddr')) + "\n";
             
