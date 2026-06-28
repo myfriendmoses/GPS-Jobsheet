@@ -7,8 +7,15 @@
     
     <!-- PWA Web Manifest Configuration -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    
+    <!-- App Icons for Mobile Home Screen & Browser Tabs -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="logo.png">
+    
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Addy.co.nz Autocomplete Stylesheet -->
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
@@ -42,61 +49,164 @@
             margin: 0 auto;
         }
 
-        /* Full Screen Prerequisite Gate Shield Overlay */
-        #installGateOverlay {
+        /* Premium Gate Shield Overlay Styles from Pre-Start App */
+        .gate-shield {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #0f172abf;
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: none; 
-            justify-content: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: #ffffff;
+            z-index: 99999;
+            display: none; /* Controlled dynamically by JavaScript */
+            flex-direction: column;
             align-items: center;
-            padding: 1rem;
-        }
-        .gate-card {
-            background: var(--surface);
-            max-width: 500px;
-            width: 100%;
-            padding: 2rem 1.5rem;
-            border-radius: 12px;
+            justify-content: center;
+            padding: 2rem;
+            box-sizing: border-box;
             text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            overflow-y: auto;
         }
-        .gate-card h2 {
-            color: var(--primary);
-            margin-bottom: 1rem;
+
+        .gate-content {
+            max-width: 480px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin: auto 0;
+            padding: 1rem 0;
+        }
+
+        .gate-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+        }
+
+        .gate-title {
             font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #38bdf8;
+            margin: 0;
         }
-        .gate-card p {
-            color: #475569;
-            margin-bottom: 1.5rem;
+
+        .gate-subtitle {
             font-size: 0.95rem;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin: 0;
         }
+
         .instruction-box {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 1.25rem;
+            width: 100%;
+            box-sizing: border-box;
             text-align: left;
-            background: #f1f5f9;
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1.5rem;
-            display: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
-        .instruction-box h3 {
-            margin-bottom: 0.5rem;
+
+        .instruction-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instruction-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: #e2e8f0;
+        }
+
+        .instruction-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            background-color: #38bdf8;
+            color: #0f172a;
+            font-weight: 800;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .step-text {
+            flex: 1;
+        }
+
+        .btn-install-native {
+            background-color: #38bdf8;
+            color: #0f172a;
+            font-weight: 800;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
             font-size: 0.95rem;
-            color: #1e293b;
+            margin-top: 0.5rem;
+            display: none; /* Shown dynamically when beforeinstallprompt fires */
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
-        .instruction-box ol {
-            padding-left: 1.25rem;
-            font-size: 0.85rem;
-            color: #334155;
+
+        .btn-install-native:hover {
+            background-color: #0ea5e9;
+            transform: translateY(-1px);
         }
-        .instruction-box ol li {
-            margin-bottom: 0.4rem;
+
+        .inline-icon {
+            display: inline-flex;
+            align-self: center;
+            vertical-align: middle;
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            margin: 0 2px;
+        }
+
+        .gate-bypass-link {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .gate-bypass-link:hover {
+            color: #94a3b8;
         }
 
         .app-header {
@@ -297,35 +407,59 @@
 </head>
 <body>
 
-    <!-- Prerequisite Gate Overlay Screen Wrapper -->
-    <div id="installGateOverlay">
-        <div class="gate-card">
-            <h2>Mobile Installation Required</h2>
-            <p>To ensure total offline availability and continuous background auto-saving during pilot transit operations, this application must be added to your mobile home screen first.</p>
+    <!-- Premium Gate Shield Overlay from Daily Vehicle Pre-Start App -->
+    <div id="gateShield" class="gate-shield">
+        <div class="gate-content">
+            <img class="gate-logo" src="logo.png" alt="GPS Logo" onerror="this.style.display='none'">
+            <h2 class="gate-title">App Installation Required</h2>
+            <p class="gate-subtitle">To ensure total offline availability and continuous background auto-saving during pilot transit operations, this application must be added to your mobile home screen first.</p>
             
-            <!-- Apple Safari Instructions Block -->
-            <div id="appleInstructions" class="instruction-box">
-                <h3>Apple iOS (Safari) Instructions:</h3>
-                <ol>
-                    <li>Tap the browser <strong>Share button</strong> panel icon (square with upward arrow) at the bottom of the screen.</li>
-                    <li>Scroll down the layout list and tap <strong>'Add to Home Screen'</strong>.</li>
-                    <li>Confirm the name and tap <strong>Add</strong> in the top right corner.</li>
-                </ol>
+            <!-- iOS Safari Setup Guide -->
+            <div id="iosInstructions" class="instruction-box" style="display: none;">
+                <div class="instruction-header">iOS Installation</div>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        Tap the <strong>Share</strong> button
+                        <svg class="inline-icon" viewBox="0 0 24 24">
+                            <path d="M12 3a1 1 0 0 1 1 1v12a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1z" fill="#38bdf8"/>
+                            <path d="M12 2a1 1 0 0 1 .707.293l4 4a1 1 0 1 1-1.414 1.414L12 4.414 8.707 7.707A1 1 0 1 1 7.293 6.293l4-4A1 1 0 0 1 12 2z" fill="#38bdf8"/>
+                            <path d="M5 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H6v5h12v-5h-2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-6z" fill="#38bdf8"/>
+                        </svg>
+                        in the browser navigation bar.
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Scroll down the menu list and select <strong>Add to Home Screen</strong>.</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Tap <strong>Add</strong> in the top right corner. Launch from your home screen.</div>
+                </div>
             </div>
 
-            <!-- Android Chrome/Edge Instructions Block -->
-            <div id="androidInstructions" class="instruction-box">
-                <h3>Android (Chrome / Edge) Instructions:</h3>
-                <ol>
-                    <li>Tap the browser <strong>three-dot menu</strong> settings icon in the top right corner.</li>
-                    <li>Look down the menu options list and tap <strong>'Add to Home screen'</strong> or <strong>'Install app'</strong>.</li>
-                    <li>Confirm the prompt, and the app icon will appear on your device.</li>
-                </ol>
+            <!-- Android Native/Standard Setup Guide -->
+            <div id="androidInstructions" class="instruction-box" style="display: none;">
+                <div class="instruction-header">Android Installation</div>
+                
+                <!-- Native Button (Becomes visible dynamically if prompt behaves) -->
+                <button id="androidInstallBtn" class="btn-install-native" onclick="triggerNativeInstall()">Install Jobsheet App</button>
+                
+                <div id="androidManualSteps" style="margin-top: 0.5rem;">
+                    <div class="instruction-step">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Tap the <strong>Menu</strong> button (three vertical dots <svg class="inline-icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="#38bdf8"/><circle cx="12" cy="12" r="2" fill="#38bdf8"/><circle cx="12" cy="19" r="2" fill="#38bdf8"/></svg>) in the top-right of your browser.</div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Select <strong>Install app</strong> or <strong>Add to Home screen</strong>.</div>
+                    </div>
+                </div>
             </div>
-            
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0; line-height: 1.4;">
-                Once added, simply close this browser tab and launch the new icon from your home screen to unlock full workspace access.
-            </p>
+
+            <!-- Secondary Override Bypass for Testing/QA -->
+            <button class="gate-bypass-link" onclick="bypassGate()">Dismiss for testing</button>
         </div>
     </div>
 
@@ -453,7 +587,6 @@
             };
 
             // Initialize options and pass onSelection callbacks directly as part of options.
-            // This is safer across differing versions of addy.min.js
             var startLookup = new AddyComplete(document.getElementById("startAddr"), {
                 excludePostBox: false,
                 onSelection: handleStartSelection
@@ -479,7 +612,7 @@
 
     <script>
         let saveTimeout;
-        const gateOverlay = document.getElementById('installGateOverlay');
+        let deferredPrompt;
 
         // 1. Service Worker initialization (Wrapped safely with Promise error handling to prevent sandbox rejections)
         if ('serviceWorker' in navigator) {
@@ -498,31 +631,73 @@
             }
         }
 
-        // 2. Mobile Condition Validation
-        function checkStandaloneMode() {
+        // 2. Premium PWA Gate Shield Controller
+        function checkGateShield() {
+            // Check if device is mobile
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            if (!isMobile) {
-                gateOverlay.style.display = 'none';
-                return;
-            }
+            // Check standalone mode (PWA installed launch context)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            
+            // Check if the user previously dismissed the gate in this session (testing purposes)
+            const isDismissed = sessionStorage.getItem('gps_gate_dismissed') === 'true';
 
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            if (isStandalone) {
-                gateOverlay.style.display = 'none'; 
-            } else {
-                gateOverlay.style.display = 'flex'; 
+            if (isMobile && !isStandalone && !isDismissed) {
+                const gateShield = document.getElementById('gateShield');
+                gateShield.style.display = 'flex';
+
+                // Detect OS and toggle respective instructions
+                const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
                 
-                if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                    document.getElementById('appleInstructions').style.display = 'block';
+                if (isiOS) {
+                    document.getElementById('iosInstructions').style.display = 'block';
+                    document.getElementById('androidInstructions').style.display = 'none';
                 } else {
                     document.getElementById('androidInstructions').style.display = 'block';
+                    document.getElementById('iosInstructions').style.display = 'none';
+                }
+            } else {
+                const gateShield = document.getElementById('gateShield');
+                if (gateShield) {
+                    gateShield.style.display = 'none';
                 }
             }
         }
 
+        // Native installation promoter for Android
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const nativeInstallBtn = document.getElementById('androidInstallBtn');
+            const manualSteps = document.getElementById('androidManualSteps');
+            
+            if (nativeInstallBtn) {
+                nativeInstallBtn.style.display = 'block';
+            }
+            if (manualSteps) {
+                // Dim down manual steps when standard native installer button is active
+                manualSteps.style.opacity = '0.5';
+            }
+        });
+
+        function triggerNativeInstall() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    document.getElementById('gateShield').style.display = 'none';
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        function bypassGate() {
+            sessionStorage.setItem('gps_gate_dismissed', 'true');
+            document.getElementById('gateShield').style.display = 'none';
+        }
+
         window.onload = function() {
-            checkStandaloneMode(); 
+            checkGateShield(); 
             loadInputs();
             if (!document.getElementById('uniqueId').value) {
                 generateRandomId();
