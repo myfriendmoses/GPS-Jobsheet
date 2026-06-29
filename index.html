@@ -6,13 +6,13 @@
     <title>Goodwin Piloting Services - Jobsheet Generator</title>
     
     <!-- PWA Web Manifest Configuration -->
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Goodwin%20Piloting%20Services%22,%22short_name%22:%22GPS%20Jobsheet%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e3a8a%22,%22icons%22:[{%22src%22:%22logo.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
     
     <!-- App Icons for Mobile Home Screen & Browser Tabs -->
     <link rel="icon" type="image/png" href="logo.png">
     <link class="apple-touch-icon" rel="apple-touch-icon" href="logo.png">
     
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#1e3a8a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,31 +22,42 @@
 
     <style>
         :root {
-            --primary: #2563eb;
+            --primary: #1e3a8a;
+            --primary-hover: #1e40af;
             --bg: #f8fafc;
             --surface: #ffffff;
             --border: #e2e8f0;
             --text: #0f172a;
+            --text-secondary: #475569;
             --danger: #ef4444;
             --danger-hover: #dc2626;
-            --info: #3b82f6;
-            --info-hover: #2563eb;
+            --success: #22c55e;
             --email: #db2777;
             --email-hover: #be185d;
         }
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.5;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
             padding: 1rem;
+            box-sizing: border-box;
             max-width: 1200px;
             margin: 0 auto;
+            overflow-y: auto;
         }
 
         /* Premium Gate Shield Overlay Styles from Pre-Start App */
@@ -209,38 +220,51 @@
             color: #94a3b8;
         }
 
+        /* Header Style Changes from Pre-Start App */
         .app-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            margin: 0.5rem 0 1.25rem 0;
         }
         .app-logo {
-            max-height: 70px;
-            width: auto;
-            margin-bottom: 0.5rem;
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 12px;
         }
         h1 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 800;
         }
         
+        /* Grid system layout from Pre-Start App */
         .container {
-            display: flex;
-            flex-direction: row;
-            gap: 1.5rem;
-            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 1.25rem;
+            align-items: start;
         }
         .form-section {
             background: var(--surface);
             padding: 1.25rem;
-            border-radius: 8px;
+            border-radius: 12px;
             border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            width: 50%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            min-width: 0;
         }
         .output-section {
             display: flex;
             flex-direction: column;
-            width: 50%;
+            position: sticky;
+            top: 1rem;
+            min-width: 0;
         }
         .form-group {
             margin-bottom: 1rem;
@@ -268,43 +292,54 @@
             width: auto;
             padding: 0 1rem;
             background-color: #64748b;
+            border-radius: 8px;
         }
         .input-with-btn button:hover {
             background-color: #475569;
         }
         label {
             display: block;
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 0.35rem;
-            color: #334155;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
         input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], textarea {
             width: 100%;
-            padding: 0.65rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            padding: 0.75rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
             font-family: inherit;
             font-size: 1rem; 
             background-color: #fff;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
             display: block;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
         }
         button {
             background-color: var(--primary);
             color: white;
             border: none;
             padding: 0.85rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             margin-top: 0.5rem;
             transition: background-color 0.2s;
             touch-action: manipulation;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         button:hover {
-            background-color: #1d4ed8;
+            background-color: var(--primary-hover);
         }
         .button-group {
             display: flex;
@@ -317,53 +352,59 @@
             margin-top: 0;
             flex: 1;
             min-width: 120px;
-            padding: 0.75rem;
-            font-size: 0.95rem;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
         }
         .btn-danger {
-            background-color: var(--danger);
+            background-color: var(--danger) !important;
         }
         .btn-danger:hover {
-            background-color: var(--danger-hover);
+            background-color: var(--danger-hover) !important;
         }
         .btn-email {
-            background-color: var(--email);
+            background-color: var(--email) !important;
         }
         .btn-email:hover {
-            background-color: var(--email-hover);
+            background-color: var(--email-hover) !important;
         }
         .output-wrapper {
             background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
             overflow-x: auto;
             margin-bottom: 1rem;
-            padding: 1.25rem;
+            padding: 1rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            -webkit-overflow-scrolling: touch;
             width: 100%;
+            box-sizing: border-box;
         }
         pre {
             background: transparent;
             color: #000000;
             font-family: "Courier New", Courier, monospace;
             font-size: 0.85rem;
+            line-height: 1.35;
             white-space: pre; 
             min-height: 250px;
         }
         h2 {
-            font-size: 1.15rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
             border-bottom: 2px solid var(--border);
             padding-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--primary);
         }
         .save-indicator {
             font-size: 0.75rem;
-            color: #10b981;
+            color: var(--success);
             font-weight: normal;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
 
         .addy-autocomplete {
@@ -371,36 +412,36 @@
         }
 
         @media (max-width: 900px) {
-            body {
-                padding: 0.5rem;
-            }
             .container {
-                flex-direction: column;
-                gap: 1rem;
+                grid-template-columns: minmax(0, 1fr);
             }
-            .form-section, .output-section {
-                width: 100% !important;
-                display: block !important;
+            .output-section {
+                position: static;
             }
             .form-row {
-                display: block !important;
-                width: 100% !important;
+                flex-direction: column;
+                gap: 0;
+            }
+            body {
+                padding: 0.5rem;
             }
             .form-row .form-group {
                 display: block !important;
                 width: 100% !important;
                 margin-bottom: 1rem !important;
             }
-            input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], textarea {
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .output-wrapper {
-                padding: 0.75rem;
-                max-width: 100% !important;
-            }
+        }
+        @media (max-width: 600px) {
             pre {
                 font-size: 0.72rem;
+            }
+            .form-section {
+                padding: 0.85rem;
+            }
+        }
+        @media (max-width: 400px) {
+            pre {
+                font-size: 0.65rem;
             }
         }
     </style>
