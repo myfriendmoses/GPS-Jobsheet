@@ -21,6 +21,9 @@
     <link type="text/css" rel="stylesheet prefetch" href="https://www.addysolutions.com/address-lookup/1.6.2/css/addy.min.css">
 
     <style>
+        /* =========================================
+           1. CSS Variables & Theme
+           ========================================= */
         :root {
             --primary: #1e3a8a;
             --primary-hover: #1e40af;
@@ -36,6 +39,9 @@
             --email-hover: #be185d;
         }
         
+        /* =========================================
+           2. Base Reset & Typography
+           ========================================= */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -44,8 +50,6 @@
 
         html, body {
             height: 100%;
-            margin: 0;
-            padding: 0;
             background-color: var(--bg);
             color: var(--text);
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -54,13 +58,207 @@
 
         body {
             padding: 1rem;
-            box-sizing: border-box;
             max-width: 1200px;
             margin: 0 auto;
             overflow-y: auto;
         }
 
-        /* Premium Gate Shield Overlay Styles from Pre-Start App */
+        h1 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.05rem;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        /* =========================================
+           3. Layout & Header
+           ========================================= */
+        .app-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            margin: 0.5rem 0 1.25rem 0;
+        }
+        
+        .app-logo {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* =========================================
+           4. Form Layout & Elements
+           ========================================= */
+        .form-section {
+            background: var(--surface);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        input[type="date"], 
+        input[type="time"], 
+        input[type="datetime-local"], 
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background-color: #fff;
+            font-family: inherit;
+            font-size: 1rem; 
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            display: block;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Special Inputs */
+        .input-with-btn {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .input-with-btn input {
+            flex: 1;
+        }
+
+        .input-with-btn button {
+            margin-top: 0;
+            width: auto;
+            padding: 0 1rem;
+            background-color: #64748b;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .input-with-btn button:hover {
+            background-color: #475569;
+        }
+
+        .addy-autocomplete {
+            width: 100% !important;
+        }
+
+        .save-indicator {
+            font-size: 0.75rem;
+            color: var(--success);
+            font-weight: normal;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* =========================================
+           5. Buttons
+           ========================================= */
+        button.action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+            touch-action: manipulation;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button.action-btn:hover { background-color: var(--primary-hover); }
+        
+        .btn-danger { background-color: var(--danger) !important; }
+        .btn-danger:hover { background-color: var(--danger-hover) !important; }
+        
+        .btn-email { background-color: var(--email) !important; }
+        .btn-email:hover { background-color: var(--email-hover) !important; }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .button-group button {
+            margin-top: 0;
+            flex: 1;
+            min-width: 100px;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* =========================================
+           6. Gate Shield Overlay
+           ========================================= */
         .gate-shield {
             position: fixed;
             top: 0;
@@ -70,12 +268,11 @@
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
             color: #ffffff;
             z-index: 99999;
-            display: none; /* Controlled dynamically by JavaScript */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            box-sizing: border-box;
             text-align: center;
             overflow-y: auto;
         }
@@ -122,7 +319,6 @@
             border-radius: 14px;
             padding: 1.25rem;
             width: 100%;
-            box-sizing: border-box;
             text-align: left;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
@@ -149,9 +345,7 @@
             color: #e2e8f0;
         }
 
-        .instruction-step:last-child {
-            margin-bottom: 0;
-        }
+        .instruction-step:last-child { margin-bottom: 0; }
 
         .step-number {
             background-color: #38bdf8;
@@ -167,10 +361,6 @@
             font-size: 0.8rem;
         }
 
-        .step-text {
-            flex: 1;
-        }
-
         .btn-install-native {
             background-color: #38bdf8;
             color: #0f172a;
@@ -182,7 +372,7 @@
             width: 100%;
             font-size: 0.95rem;
             margin-top: 0.5rem;
-            display: none; /* Shown dynamically when beforeinstallprompt fires */
+            display: none;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
             text-transform: uppercase;
@@ -209,215 +399,156 @@
             color: #64748b;
             text-decoration: underline;
             cursor: pointer;
-            transition: color 0.2s;
             background: none;
             border: none;
             padding: 0.5rem;
             margin-top: 0.5rem;
         }
 
-        .gate-bypass-link:hover {
-            color: #94a3b8;
-        }
+        .gate-bypass-link:hover { color: #94a3b8; }
 
-        /* Header Style Changes from Pre-Start App */
-        .app-header {
-            display: flex;
-            flex-direction: column;
+        /* =========================================
+           7. Output Modal & Terminal Mockup
+           ========================================= */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
             align-items: center;
             justify-content: center;
-            gap: 0.65rem;
-            margin: 0.5rem 0 1.25rem 0;
+            padding: 1rem;
         }
-        .app-logo {
-            width: 72px;
-            height: 72px;
-            object-fit: contain;
-            border-radius: 12px;
-        }
-        h1 {
-            font-size: 1.15rem;
-            color: var(--primary);
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 800;
-        }
-        
-        /* Grid system layout from Pre-Start App */
-        .container {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 1.25rem;
-            align-items: start;
-        }
-        .form-section {
+
+        .modal-card {
             background: var(--surface);
-            padding: 1.25rem;
-            border-radius: 12px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            min-width: 0;
-        }
-        .output-section {
+            border-radius: 14px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
-            position: sticky;
-            top: 1rem;
-            min-width: 0;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
         }
-        .form-group {
-            margin-bottom: 1rem;
-            width: 100%;
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-        .form-row {
+
+        .modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 1rem;
-            width: 100%;
+            align-items: center;
+            justify-content: space-between;
         }
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-        .input-with-btn {
-            display: flex;
-            gap: 0.5rem;
-            width: 100%;
-        }
-        .input-with-btn input {
-            flex: 1;
-        }
-        .input-with-btn button {
-            margin-top: 0;
-            width: auto;
-            padding: 0 1rem;
-            background-color: #64748b;
-            border-radius: 8px;
-        }
-        .input-with-btn button:hover {
-            background-color: #475569;
-        }
-        label {
-            display: block;
-            font-weight: 700;
-            font-size: 0.8rem;
-            margin-bottom: 0.4rem;
-            color: var(--text-secondary);
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
         }
-        input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 1rem; 
-            background-color: #fff;
-            transition: border-color 0.2s;
-            -webkit-appearance: none;
-            display: block;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        button {
-            background-color: var(--primary);
-            color: white;
+
+        .modal-close-btn {
+            background: transparent;
             border: none;
-            padding: 0.85rem 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
+            font-size: 1.75rem;
+            color: var(--text-secondary);
             cursor: pointer;
+            padding: 0 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close-btn:hover { color: var(--text); }
+
+        .modal-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            background-color: #f8fafc;
+        }
+
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: #f1f5f9; }
+        .modal-body::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+
+        /* Terminal Mockup */
+        .output-wrapper {
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 1.75rem 1.25rem 1.25rem 1.25rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            overflow-x: auto;
             width: 100%;
-            margin-top: 0.5rem;
-            transition: background-color 0.2s;
-            touch-action: manipulation;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
-        button:hover {
-            background-color: var(--primary-hover);
+
+        .output-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            box-shadow: 14px 0 0 #f59e0b, 28px 0 0 #10b981;
         }
-        .button-group {
+
+        .output-wrapper::after {
+            content: 'GPS JOBSHEET TERMINAL v2.5';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.65rem;
+            color: #475569;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        pre {
+            background: transparent;
+            color: #f1f5f9;
+            padding: 0;
+            margin: 0;
+            font-family: 'SFMono-Regular', Consolas, 'Fira Code', 'Liberation Mono', monospace;
+            font-size: 0.825rem;
+            line-height: 1.45;
+            white-space: pre; 
+        }
+
+        .modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
             display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
-            width: 100%;
         }
-        .button-group button {
+
+        .modal-footer .action-btn {
             margin-top: 0;
             flex: 1;
             min-width: 120px;
-            padding: 0.75rem 0.5rem;
-            font-size: 0.85rem;
-        }
-        .btn-danger {
-            background-color: var(--danger) !important;
-        }
-        .btn-danger:hover {
-            background-color: var(--danger-hover) !important;
-        }
-        .btn-email {
-            background-color: var(--email) !important;
-        }
-        .btn-email:hover {
-            background-color: var(--email-hover) !important;
-        }
-        .output-wrapper {
-            background: #ffffff;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        pre {
-            background: transparent;
-            color: #000000;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 0.85rem;
-            line-height: 1.35;
-            white-space: pre; 
-            min-height: 250px;
-        }
-        h2 {
-            font-size: 1.05rem;
-            margin-top: 0;
-            margin-bottom: 1.25rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--primary);
-        }
-        .save-indicator {
-            font-size: 0.75rem;
-            color: var(--success);
-            font-weight: normal;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .addy-autocomplete {
-            width: 100% !important;
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                grid-template-columns: minmax(0, 1fr);
-            }
-            .output-section {
-                position: static;
-            }
+        /* =========================================
+           8. Responsive Design
+           ========================================= */
+        @media (max-width: 850px) {
             .form-row {
                 flex-direction: column;
                 gap: 0;
@@ -431,24 +562,16 @@
                 margin-bottom: 1rem !important;
             }
         }
+
         @media (max-width: 600px) {
-            pre {
-                font-size: 0.72rem;
-            }
-            .form-section {
-                padding: 0.85rem;
-            }
-        }
-        @media (max-width: 400px) {
-            pre {
-                font-size: 0.65rem;
-            }
+            .form-section { padding: 0.85rem; }
+            pre { font-size: 0.72rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Premium Gate Shield Overlay from Daily Vehicle Pre-Start App -->
+    <!-- Premium Gate Shield Overlay -->
     <div id="gateShield" class="gate-shield">
         <div class="gate-content">
             <img class="gate-logo" src="logo.png" alt="GPS Logo" onerror="this.style.display='none'">
@@ -483,10 +606,7 @@
             <!-- Android Native/Standard Setup Guide -->
             <div id="androidInstructions" class="instruction-box" style="display: none;">
                 <div class="instruction-header">Android Installation</div>
-                
-                <!-- Native Button (Becomes visible dynamically if prompt behaves) -->
                 <button id="androidInstallBtn" class="btn-install-native" onclick="triggerNativeInstall()">Install Jobsheet App</button>
-                
                 <div id="androidManualSteps" style="margin-top: 0.5rem;">
                     <div class="instruction-step">
                         <div class="step-number">1</div>
@@ -499,23 +619,26 @@
                 </div>
             </div>
 
-            <!-- Secondary Override Bypass for Testing/QA -->
             <button class="gate-bypass-link" onclick="bypassGate()">Dismiss for testing</button>
         </div>
     </div>
 
+    <!-- Application Header -->
     <div class="app-header">
         <img src="logo.png" alt="GPS Logo" class="app-logo" onerror="this.style.display='none'">
         <h1>Goodwin Piloting Services Jobsheet</h1>
     </div>
 
     <div class="container">
-        <!-- Input Form -->
+        <!-- Input Form Section -->
         <div class="form-section">
             <h2>Enter Details <span id="saveIndicator" class="save-indicator">Autosaved ✓</span></h2>
             
             <div class="form-row">
-                <div class="form-group"><label>Date</label><input type="date" id="date"></div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="date">
+                </div>
                 <div class="form-group">
                     <label>Unique ID</label>
                     <div class="input-with-btn">
@@ -525,14 +648,21 @@
                 </div>
             </div>
 
-            <div class="form-group"><label>Customer</label><input type="text" id="customer"></div>
-            <div class="form-group"><label>Description</label><input type="text" id="description"></div>
+            <div class="form-group">
+                <label>Customer</label>
+                <input type="text" id="customer" placeholder="e.g. Infrastructure Co.">
+            </div>
             
-            <!-- Customer Order Label -->
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="description" placeholder="e.g. Bridge Girder Transport">
+            </div>
+            
             <div class="form-group">
                 <label>Customer Order Number</label>
                 <input type="text" id="customerOrder" placeholder="e.g. PO12345">
             </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label>OPIA Permit</label>
@@ -544,181 +674,195 @@
                 </div>
             </div>
             
-            <div class="form-group"><label>Start Address</label><input type="text" id="startAddr" placeholder="Search start address..." auto-complete></div>
-            <div class="form-group"><label>End Address</label><input type="text" id="endAddr" placeholder="Search end address..." auto-complete></div>
-
-            <div class="form-row">
-                <div class="form-group"><label>Base Mileage</label><input type="number" id="baseKm"></div>
-                <div class="form-group"><label>Time at Base</label><input type="datetime-local" id="timeBase"></div>
+            <div class="form-group">
+                <label>Start Address</label>
+                <input type="text" id="startAddr" placeholder="Search start address..." auto-complete>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>Start Mileage</label><input type="number" id="startKm"></div>
-                <div class="form-group"><label>Time at Start</label><input type="datetime-local" id="timeStart"></div>
+            
+            <div class="form-group">
+                <label>End Address</label>
+                <input type="text" id="endAddr" placeholder="Search end address..." auto-complete>
             </div>
 
-            <div class="form-group"><label>Time Required</label><input type="datetime-local" id="timeReq"></div>
             <div class="form-row">
-                <div class="form-group"><label>Start Time</label><input type="datetime-local" id="startTime"></div>
-                <div class="form-group"><label>End Time</label><input type="datetime-local" id="endTime"></div>
+                <div class="form-group">
+                    <label>Base Mileage</label>
+                    <input type="number" id="baseKm" placeholder="KM">
+                </div>
+                <div class="form-group">
+                    <label>Time at Base</label>
+                    <input type="datetime-local" id="timeBase">
+                </div>
             </div>
-            <div class="form-group"><label>Standby Duration (HH:MM)</label><input type="time" id="standby"></div>
 
-            <div class="form-group"><label>End Mileage</label><input type="number" id="endKm"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Mileage</label>
+                    <input type="number" id="startKm" placeholder="KM">
+                </div>
+                <div class="form-group">
+                    <label>Time at Start</label>
+                    <input type="datetime-local" id="timeStart">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Time Required</label>
+                <input type="datetime-local" id="timeReq">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="datetime-local" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="datetime-local" id="endTime">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Standby Duration (HH:MM)</label>
+                <input type="time" id="standby">
+            </div>
+
+            <div class="form-group">
+                <label>End Mileage</label>
+                <input type="number" id="endKm" placeholder="KM">
+            </div>
             
             <div class="form-row">
-                <div class="form-group"><label>Base Mileage (E)</label><input type="number" id="baseKmE"></div>
-                <div class="form-group"><label>Time at Base (E)</label><input type="datetime-local" id="timeBaseE"></div>
+                <div class="form-group">
+                    <label>Base Mileage (E)</label>
+                    <input type="number" id="baseKmE" placeholder="KM">
+                </div>
+                <div class="form-group">
+                    <label>Time at Base (E)</label>
+                    <input type="datetime-local" id="timeBaseE">
+                </div>
             </div>
 
+            <!-- Hidden calculation fields for data persistence -->
             <input type="hidden" id="pilotTime">
             <input type="hidden" id="timesheetTotal">
             <input type="hidden" id="standbyTotal">
             <input type="hidden" id="pilotKmTotal">
             
-            <div class="form-group"><label>Notes</label><textarea id="notes" rows="3"></textarea></div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="notes" rows="3" placeholder="Additional job notes or comments..."></textarea>
+            </div>
 
             <div class="button-group">
-                <button type="button" class="btn-danger" onclick="clearForm()">Clear Form</button>
-                <button type="button" onclick="generateSheet()">Generate Jobsheet</button>
-            </div>
-        </div>
-
-        <!-- Output Display -->
-        <div class="output-section">
-            <div class="output-wrapper" id="outputWrapper">
-                <pre id="output">Ready to generate...</pre>
-            </div>
-            <div class="button-group">
-                <button id="copyBtn" onclick="copyToClipboard()">Copy Layout</button>
-                <button class="btn-email" onclick="sendViaEmail()">Send via Email</button>
+                <button type="button" class="action-btn btn-danger" onclick="clearForm()">Clear Form</button>
+                <button type="button" class="action-btn" onclick="openSummaryModal()">Generate Jobsheet</button>
             </div>
         </div>
     </div>
 
-    <!-- Callback Initializer for Addy Autocomplete Engine -->
+    <!-- Summary Preview Modal -->
+    <div id="summaryModal" class="modal-backdrop" onclick="handleBackdropClick(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Jobsheet Preview</h3>
+                <button type="button" class="modal-close-btn" onclick="closeSummaryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="output-wrapper">
+                    <pre id="output">Ready to generate...</pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalCopyBtn" class="action-btn" onclick="copyToClipboard()">Copy Layout</button>
+                <button class="action-btn btn-email" onclick="sendViaEmail()">Send via Email</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast/Alert Message System -->
+    <div id="toast" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 10000; align-items: center; gap: 8px;">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- =========================================
+         Scripts
+         ========================================= -->
+
+    <!-- Addy Autocomplete Initialization -->
     <script type="text/javascript">
         function initAddy() {
-            // Function to handle autocomplete selections defensively
-            const handleStartSelection = (data) => {
+            const handleAddressSelection = (data, targetId) => {
                 if (data && data.address) {
-                    let fullParts = [data.address.address1];
-                    if (data.address.address2) fullParts.push(data.address.address2);
-                    if (data.address.city) fullParts.push(data.address.city);
-                    if (data.address.postcode) fullParts.push(data.address.postcode);
+                    let parts = [data.address.address1];
+                    if (data.address.address2) parts.push(data.address.address2);
+                    if (data.address.city) parts.push(data.address.city);
+                    if (data.address.postcode) parts.push(data.address.postcode);
                     
-                    document.getElementById("startAddr").value = fullParts.join(", ");
+                    document.getElementById(targetId).value = parts.join(", ");
                 }
                 saveInputs(); 
                 showSaveIndicator(); 
                 generateSheet();
             };
 
-            const handleEndSelection = (data) => {
-                if (data && data.address) {
-                    let fullParts = [data.address.address1];
-                    if (data.address.address2) fullParts.push(data.address.address2);
-                    if (data.address.city) fullParts.push(data.address.city);
-                    if (data.address.postcode) fullParts.push(data.address.postcode);
-                    
-                    document.getElementById("endAddr").value = fullParts.join(", ");
-                }
-                saveInputs(); 
-                showSaveIndicator(); 
-                generateSheet();
-            };
-
-            // Initialize options and pass onSelection callbacks directly as part of options.
-            var startLookup = new AddyComplete(document.getElementById("startAddr"), {
+            const startLookup = new AddyComplete(document.getElementById("startAddr"), {
                 excludePostBox: false,
-                onSelection: handleStartSelection
+                onSelection: (data) => handleAddressSelection(data, "startAddr")
             });
 
-            var endLookup = new AddyComplete(document.getElementById("endAddr"), {
+            const endLookup = new AddyComplete(document.getElementById("endAddr"), {
                 excludePostBox: false,
-                onSelection: handleEndSelection
+                onSelection: (data) => handleAddressSelection(data, "endAddr")
             });
 
-            // Defensive binding backup if the instance does support standard event registries
-            if (typeof startLookup.on === 'function') {
-                startLookup.on("selection", handleStartSelection);
-            }
-            if (typeof endLookup.on === 'function') {
-                endLookup.on("selection", handleEndSelection);
-            }
+            // Defensive binding backup
+            if (typeof startLookup.on === 'function') startLookup.on("selection", (data) => handleAddressSelection(data, "startAddr"));
+            if (typeof endLookup.on === 'function') endLookup.on("selection", (data) => handleAddressSelection(data, "endAddr"));
         }
     </script>
-
-    <!-- Script loaded with your specific API Key -->
     <script src="https://www.addysolutions.com/address-lookup/1.6.2/js/addy.min.js?nzKey=9bd592e4fe6c48e5abf1f521003863e0&country=nz&callback=initAddy" async defer></script>
 
     <script>
         let saveTimeout;
         let deferredPrompt;
 
-        // 1. Service Worker initialization (Wrapped safely with Promise error handling to prevent sandbox rejections)
+        // --- 1. Service Worker & PWA Logic ---
         if ('serviceWorker' in navigator) {
             try {
                 const swCode = `
                     self.addEventListener('install', e => self.skipWaiting());
                     self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
                 `;
-                const blob = new Blob([swCode], {type: 'application/javascript'});
-                const blobUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(blobUrl)
-                    .then(reg => console.log('ServiceWorker registered with scope:', reg.scope))
-                    .catch(err => console.warn('Service Worker registration skipped or failed:', err));
+                const blobUrl = URL.createObjectURL(new Blob([swCode], {type: 'application/javascript'}));
+                navigator.serviceWorker.register(blobUrl).catch(err => console.warn('Service Worker ignored:', err));
             } catch (e) {
-                console.warn('Service Worker configuration rejected in this context:', e);
+                console.warn('Service Worker configuration rejected:', e);
             }
         }
 
-        // 2. Premium PWA Gate Shield Controller
         function checkGateShield() {
-            // Check if device is mobile
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            // Check standalone mode (PWA installed launch context)
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            
-            // Check if the user previously dismissed the gate in this session (testing purposes)
             const isDismissed = sessionStorage.getItem('gps_gate_dismissed') === 'true';
 
             if (isMobile && !isStandalone && !isDismissed) {
-                const gateShield = document.getElementById('gateShield');
-                gateShield.style.display = 'flex';
-
-                // Detect OS and toggle respective instructions
+                document.getElementById('gateShield').style.display = 'flex';
                 const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
                 
-                if (isiOS) {
-                    document.getElementById('iosInstructions').style.display = 'block';
-                    document.getElementById('androidInstructions').style.display = 'none';
-                } else {
-                    document.getElementById('androidInstructions').style.display = 'block';
-                    document.getElementById('iosInstructions').style.display = 'none';
-                }
-            } else {
-                const gateShield = document.getElementById('gateShield');
-                if (gateShield) {
-                    gateShield.style.display = 'none';
-                }
+                document.getElementById('iosInstructions').style.display = isiOS ? 'block' : 'none';
+                document.getElementById('androidInstructions').style.display = !isiOS ? 'block' : 'none';
             }
         }
 
-        // Native installation promoter for Android
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             const nativeInstallBtn = document.getElementById('androidInstallBtn');
             const manualSteps = document.getElementById('androidManualSteps');
-            
-            if (nativeInstallBtn) {
-                nativeInstallBtn.style.display = 'block';
-            }
-            if (manualSteps) {
-                // Dim down manual steps when standard native installer button is active
-                manualSteps.style.opacity = '0.5';
-            }
+            if (nativeInstallBtn) nativeInstallBtn.style.display = 'block';
+            if (manualSteps) manualSteps.style.opacity = '0.5';
         });
 
         function triggerNativeInstall() {
@@ -737,68 +881,73 @@
             document.getElementById('gateShield').style.display = 'none';
         }
 
+        // --- 2. Initialization & Listeners ---
         window.onload = function() {
             checkGateShield(); 
             loadInputs();
-            if (!document.getElementById('uniqueId').value) {
-                generateRandomId();
+            
+            if (!document.getElementById('uniqueId').value) generateRandomId();
+            
+            if (!document.getElementById('date').value) {
+                document.getElementById('date').value = new Date().toISOString().split('T')[0];
             }
 
-            const allInputs = document.querySelectorAll('input, textarea');
-            allInputs.forEach(input => {
-                input.addEventListener('input', () => {
+            document.querySelectorAll('input, textarea').forEach(input => {
+                const triggerUpdate = () => {
                     saveInputs();
                     showSaveIndicator();
-                    generateSheet(); // Updates live output on change
-                });
+                    generateSheet();
+                };
+                input.addEventListener('input', triggerUpdate);
+                input.addEventListener('change', triggerUpdate);
             });
             
-            if(document.getElementById('customer').value) {
-                generateSheet();
-            }
+            if(document.getElementById('customer').value) generateSheet();
         };
 
-        // Standard save, load, and clear mechanisms
-        function saveInputs() {
-            const data = {};
-            document.querySelectorAll('input, textarea').forEach(input => {
-                data[input.id] = input.value;
-            });
-            localStorage.setItem('gps_jobsheet_data', JSON.stringify(data));
-        }
-
-        function loadInputs() {
-            const savedData = localStorage.getItem('gps_jobsheet_data');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                for (const id in data) {
-                    const el = document.getElementById(id);
-                    if (el) { el.value = data[id]; }
-                }
-            }
-        }
-
-        function valKm(id) {
-            const v = document.getElementById(id).value;
-            return v ? `${v} KM` : 'NULL';
-        }
-
-        function clearForm() {
-            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-                localStorage.removeItem('gps_jobsheet_data');
-                document.querySelectorAll('input, textarea').forEach(input => {
-                    input.value = '';
-                });
-                generateRandomId();
-                document.getElementById('output').textContent = 'Ready to generate...';
-            }
+        // --- 3. UI Helpers ---
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            document.getElementById('toastIcon').textContent = isError ? '❌' : '✅';
+            
+            toast.style.display = 'flex';
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
 
         function showSaveIndicator() {
             const indicator = document.getElementById('saveIndicator');
             indicator.style.opacity = '1';
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { indicator.style.opacity = '0'; }, 1500);
+            saveTimeout = setTimeout(() => indicator.style.opacity = '0', 1500);
+        }
+
+        // --- 4. Data State Management ---
+        function saveInputs() {
+            const data = {};
+            document.querySelectorAll('input, textarea').forEach(input => data[input.id] = input.value);
+            localStorage.setItem('gps_jobsheet_data', JSON.stringify(data));
+        }
+
+        function loadInputs() {
+            const savedData = localStorage.getItem('gps_jobsheet_data');
+            if (!savedData) return;
+            const data = JSON.parse(savedData);
+            for (const id in data) {
+                const el = document.getElementById(id);
+                if (el) el.value = data[id];
+            }
+        }
+
+        function clearForm() {
+            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+                localStorage.removeItem('gps_jobsheet_data');
+                document.querySelectorAll('input, textarea').forEach(input => input.value = '');
+                document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                generateRandomId();
+                document.getElementById('output').textContent = 'Ready to generate...';
+                showToast("Form cleared.");
+            }
         }
 
         function generateRandomId() {
@@ -810,59 +959,10 @@
             document.getElementById('uniqueId').value = id;
         }
 
-        function roundInputTime(id) {
-            const input = document.getElementById(id);
-            if (!input || !input.value) return;
-            
-            const v = input.value;
-            const isDateTime = v.includes('T');
-            
-            if (isDateTime) {
-                const dateObj = new Date(v);
-                const minutes = dateObj.getMinutes();
-                const roundedMinutes = Math.round(minutes / 15) * 15;
-                dateObj.setMinutes(roundedMinutes);
-                
-                const yyyy = dateObj.getFullYear();
-                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const dd = String(dateObj.getDate()).padStart(2, '0');
-                const hh = String(dateObj.getHours()).padStart(2, '0');
-                const min = String(dateObj.getMinutes()).padStart(2, '0');
-                input.value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-            } else {
-                const [hours, minutes] = v.split(':').map(Number);
-                let roundedMinutes = Math.round(minutes / 15) * 15;
-                let newHours = hours;
-                
-                if (roundedMinutes === 60) {
-                    roundedMinutes = 0;
-                    newHours += 1;
-                }
-                if (newHours >= 24) newHours = 0;
-                
-                input.value = `${String(newHours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
-            }
-            saveInputs();
-        }
-
-        function val(id) {
-            const v = document.getElementById(id).value;
-            return v ? v : 'NULL';
-        }
-
-        document.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('blur', (e) => {
-                if(['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'].includes(e.target.id)) {
-                    roundInputTime(e.target.id);
-                    generateSheet();
-                }
-            });
-        });
-
-        function num(id) {
-            const v = document.getElementById(id).value;
-            return v ? parseFloat(v) : null;
-        }
+        // --- 5. Data Formatting & Math Logic ---
+        function val(id) { return document.getElementById(id).value || 'NULL'; }
+        function num(id) { return document.getElementById(id).value ? parseFloat(document.getElementById(id).value) : null; }
+        function valKm(id) { return document.getElementById(id).value ? `${document.getElementById(id).value} KM` : 'NULL'; }
 
         function formatDate(id) {
             const v = document.getElementById(id).value;
@@ -876,141 +976,148 @@
             if (!v) return 'NULL';
             const [datePart, timePart] = v.split('T');
             const dateParts = datePart.split('-'); 
-            const shortYear = dateParts[0].slice(-2); 
-            return `${timePart} ${dateParts[2]}${dateParts[1]}${shortYear}`;
+            return `${timePart} ${dateParts[2]}${dateParts[1]}${dateParts[0].slice(-2)}`;
         }
 
         function formatLine(col1, col2, col3 = "") {
             const pad1 = 20; 
-            const inlinePad = 15; 
-            const maxRightColumnWidth = 40; 
+            const maxRightCol = 40; 
+            const label = col1.padEnd(pad1);
             
-            let label = col1.padEnd(pad1);
+            if (col3) return `${label}${String(col2).padEnd(15)}${col3}\n`;
             
-            if (col3) {
-                return label + String(col2).padEnd(inlinePad) + col3 + "\n";
-            } else {
-                let text = String(col2);
-                
-                if (text.length <= maxRightColumnWidth) {
-                    return label + text + "\n";
+            let text = String(col2);
+            if (text.length <= maxRightCol) return `${label}${text}\n`;
+            
+            let output = "";
+            let isFirstLine = true;
+
+            while (text.length > 0) {
+                let chunk = text.substring(0, maxRightCol);
+                if (text.length > maxRightCol) {
+                    let lastSpace = chunk.lastIndexOf(" ");
+                    if (lastSpace > maxRightCol * 0.4) chunk = text.substring(0, lastSpace);
                 }
                 
-                let lines = [];
-                while (text.length > 0) {
-                    let chunk = text.substring(0, maxRightColumnWidth);
-                    
-                    if (text.length > maxRightColumnWidth) {
-                        let lastSpace = chunk.lastIndexOf(" ");
-                        if (lastSpace > maxRightColumnWidth * 0.4) {
-                            chunk = text.substring(0, lastSpace);
-                        }
-                    }
-                    
-                    lines.push(chunk.trim());
-                    text = text.substring(chunk.length).trim();
-                }
-                
-                let output = label + lines[0] + "\n";
-                for (let i = 1; i < lines.length; i++) {
-                    output += "".padEnd(pad1) + lines[i] + "\n";
-                }
-                return output;
+                output += (isFirstLine ? label : "".padEnd(pad1)) + chunk.trim() + "\n";
+                text = text.substring(chunk.length).trim();
+                isFirstLine = false;
             }
+            return output;
         }
 
+        function roundInputTime(id) {
+            const input = document.getElementById(id);
+            if (!input || !input.value) return;
+            
+            const isDateTime = input.value.includes('T');
+            
+            if (isDateTime) {
+                const dateObj = new Date(input.value);
+                dateObj.setMinutes(Math.round(dateObj.getMinutes() / 15) * 15);
+                
+                const yyyy = dateObj.getFullYear();
+                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateObj.getDate()).padStart(2, '0');
+                const hh = String(dateObj.getHours()).padStart(2, '0');
+                const min = String(dateObj.getMinutes()).padStart(2, '0');
+                input.value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            } else {
+                let [hours, minutes] = input.value.split(':').map(Number);
+                let roundedMin = Math.round(minutes / 15) * 15;
+                
+                if (roundedMin === 60) {
+                    roundedMin = 0;
+                    hours = (hours + 1) % 24;
+                }
+                input.value = `${String(hours).padStart(2, '0')}:${String(roundedMin).padStart(2, '0')}`;
+            }
+            saveInputs();
+        }
+
+        function calculateTimeDifference(startId, endId, standbyVal = null) {
+            const startStr = document.getElementById(startId).value;
+            const endStr = document.getElementById(endId).value;
+            
+            if (!startStr || !endStr) return null;
+
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            let diffMs = end - start;
+            
+            if (diffMs < 0) return null;
+
+            if (standbyVal) {
+                const [hours, minutes] = standbyVal.split(':').map(Number);
+                diffMs -= ((hours * 60 * 60) + (minutes * 60)) * 1000;
+                if (diffMs < 0) diffMs = 0;
+            }
+
+            return (diffMs / (1000 * 60 * 60)).toFixed(2) + ' hrs';
+        }
+
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('blur', (e) => {
+                const timeFields = ['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'];
+                if(timeFields.includes(e.target.id)) {
+                    roundInputTime(e.target.id);
+                    generateSheet();
+                }
+            });
+        });
+
+        // --- 6. Document Generation ---
         function generateSheet() {
             const timeFields = ['timeReq', 'timeBase', 'timeStart', 'startTime', 'endTime', 'standby', 'timeBaseE'];
             timeFields.forEach(id => roundInputTime(id));
 
-            let startKmV = num('startKm');
-            let baseKmV = num('baseKm');
-            let baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : 'NULL';
+            // Distances
+            const startKmV = num('startKm');
+            const baseKmV = num('baseKm');
+            const baseKmEV = num('baseKmE');
+            const endKmV = num('endKm');
+
+            const baseToStartCalc = (startKmV !== null && baseKmV !== null) ? `${startKmV - baseKmV} KM` : 'NULL';
+            const endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : 'NULL';
+            const pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : 'NULL';
             
-            let baseKmEV = num('baseKmE');
-            let endKmV = num('endKm');
-            let endToBaseCalc = (baseKmEV !== null && endKmV !== null) ? `${baseKmEV - endKmV} KM` : 'NULL';
+            document.getElementById('pilotKmTotal').value = pilotKmCalc === 'NULL' ? '' : pilotKmCalc;
 
-            let pilotKmCalc = (endKmV !== null && startKmV !== null) ? `${endKmV - startKmV} KM` : 'NULL';
-            if (endKmV !== null && startKmV !== null) {
-                document.getElementById('pilotKmTotal').value = `${endKmV - startKmV} KM`;
-            } else {
-                document.getElementById('pilotKmTotal').value = '';
-            }
+            // Durations
+            const standbyVal = document.getElementById('standby').value;
+            
+            const pilotTimeVal = calculateTimeDifference('startTime', 'endTime', standbyVal) || 'NULL';
+            document.getElementById('pilotTime').value = pilotTimeVal === 'NULL' ? '' : pilotTimeVal;
 
-            const startT = document.getElementById('startTime').value;
-            const endT = document.getElementById('endTime').value;
-            const sbyT = document.getElementById('standby').value;
+            const tsTotalVal = calculateTimeDifference('timeBase', 'timeBaseE') || 'NULL';
+            document.getElementById('timesheetTotal').value = tsTotalVal === 'NULL' ? '' : tsTotalVal;
 
-            let pilotTimeVal = 'NULL';
-            if (startT && endT) {
-                const startDate = new Date(startT);
-                const endDate = new Date(endT);
-                let diffMs = endDate - startDate;
-                if (diffMs >= 0) {
-                    if (sbyT) {
-                        const [hours, minutes] = sbyT.split(':').map(Number);
-                        const standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
-                        diffMs -= standbyMs;
-                    }
-                    if (diffMs < 0) diffMs = 0;
-                    const decimalHours = diffMs / (1000 * 60 * 60);
-                    pilotTimeVal = decimalHours.toFixed(2) + ' hrs';
-                    document.getElementById('pilotTime').value = pilotTimeVal; 
-                    saveInputs();
-                }
-            } else {
-                document.getElementById('pilotTime').value = '';
-            }
-
-            const tbStart = document.getElementById('timeBase').value;
-            const tbEnd = document.getElementById('timeBaseE').value;
-
-            let tsTotalVal = 'NULL';
-            if (tbStart && tbEnd) {
-                const startDate = new Date(tbStart);
-                const endDate = new Date(tbEnd);
-                let diffMs = endDate - startDate;
-                if (diffMs >= 0) {
-                    const decimalHours = diffMs / (1000 * 60 * 60);
-                    tsTotalVal = decimalHours.toFixed(2) + ' hrs';
-                    document.getElementById('timesheetTotal').value = tsTotalVal;
-                    saveInputs();
-                }
-            } else {
-                document.getElementById('timesheetTotal').value = '';
-            }
-
+            // Standby Total calculation
+            let standbyTotalVal = 'NULL';
             const tReq = document.getElementById('timeReq').value;
             const sTime = document.getElementById('startTime').value;
-
-            let standbyTotalVal = 'NULL';
-            if ((tReq && sTime) || sbyT) {
+            
+            if ((tReq && sTime) || standbyVal) {
                 let diffMs = 0;
                 if (tReq && sTime) {
-                    const dateReq = new Date(tReq);
-                    const dateStart = new Date(sTime);
-                    diffMs = dateStart - dateReq;
+                    diffMs = new Date(sTime) - new Date(tReq);
                     if (diffMs < 0) diffMs = 0; 
                 }
 
-                let standbyMs = 0;
-                if (sbyT) {
-                    const [hours, minutes] = sbyT.split(':').map(Number);
-                    standbyMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                if (standbyVal) {
+                    const [hours, minutes] = standbyVal.split(':').map(Number);
+                    diffMs += ((hours * 60 * 60) + (minutes * 60)) * 1000;
                 }
-
-                const totalStandbyMs = diffMs + standbyMs;
-                const decimalHours = totalStandbyMs / (1000 * 60 * 60);
-                standbyTotalVal = decimalHours.toFixed(2) + ' hrs';
+                standbyTotalVal = (diffMs / (1000 * 60 * 60)).toFixed(2) + ' hrs';
                 document.getElementById('standbyTotal').value = standbyTotalVal;
-                saveInputs();
             } else {
                 document.getElementById('standbyTotal').value = '';
             }
 
+            // Document Compilation
             let txt = "GOODWIN PILOTING SERVICES JOBSHEET\n\n";
-            txt += (formatDate('date') !== 'NULL' ? formatDate('date').padEnd(20) : 'NULL                ') + val('uniqueId') + "\n\n";
+            txt += `${formatDate('date') !== 'NULL' ? formatDate('date').padEnd(20) : 'NULL                '}${val('uniqueId')}\n\n`;
+            
             txt += formatLine("CUSTOMER", val('customer'));
             txt += formatLine("DESCRIPTION", val('description')) + "\n";
             
@@ -1032,7 +1139,8 @@
             txt += formatLine("END MILEAGE", valKm('endKm'), formatDateTime('endTime'));
             txt += formatLine("BASE MILEAGE", valKm('baseKmE'), formatDateTime('timeBaseE')) + "\n";
             
-            txt += formatLine("PILOT TIME SHEET", (formatDateTime('timeBase') !== 'NULL' && formatDateTime('timeBaseE') !== 'NULL') ? `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}` : 'NULL') + "\n";
+            const tsStr = (val('timeBase') !== 'NULL' && val('timeBaseE') !== 'NULL') ? `${formatDateTime('timeBase')} - ${formatDateTime('timeBaseE')}` : 'NULL';
+            txt += formatLine("PILOT TIME SHEET", tsStr) + "\n";
             
             txt += "TOTALS\n";
             txt += formatLine("BASE TO START", baseToStartCalc);
@@ -1047,50 +1155,50 @@
             document.getElementById('output').textContent = txt;
         }
 
+        // --- 7. Output Actions ---
+        function openSummaryModal() {
+            generateSheet();
+            document.getElementById('summaryModal').style.display = 'flex';
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('summaryModal').style.display = 'none';
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target.id === 'summaryModal') closeSummaryModal();
+        }
+
         function copyToClipboard() {
             const outputText = document.getElementById('output').textContent;
-            const btn = document.getElementById('copyBtn');
+            const btn = document.getElementById('modalCopyBtn');
+            const textArea = document.createElement("textarea");
             
-            const fallbackCopy = (text) => {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.top = "0";
-                textArea.style.left = "0";
-                textArea.style.position = "fixed";
-
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-
-                try {
-                    document.execCommand('copy');
-                    btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
-                } catch (err) {
-                    alert("Copy failed. Your browser may be blocking it. Please select the text manually.");
-                }
-                
-                document.body.removeChild(textArea);
-            };
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(outputText).then(() => {
-                    btn.textContent = "Copied!";
-                    setTimeout(() => { btn.textContent = "Copy Layout"; }, 2000);
-                }).catch(() => {
-                    fallbackCopy(outputText);
-                });
-            } else {
-                fallbackCopy(outputText);
+            textArea.value = outputText;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                btn.textContent = "Copied!";
+                showToast("Jobsheet copied to clipboard!");
+                setTimeout(() => btn.textContent = "Copy Layout", 2000);
+            } catch (err) {
+                showToast("Copy failed. Please manually select the console text block.", true);
             }
+            document.body.removeChild(textArea);
         }
 
         function sendViaEmail() {
             const uid = document.getElementById('uniqueId').value || 'Draft';
             const customerName = document.getElementById('customer').value || 'Jobsheet';
+            const dateVal = formatDate('date') !== 'NULL' ? formatDate('date') : '[DATE]';
             const outputText = document.getElementById('output').textContent;
             
-            const subject = encodeURIComponent(`GPS Jobsheet - ${uid} (${customerName})`);
+            const subjectText = `${uid} — ${customerName} — ${dateVal}`;
+            const subject = encodeURIComponent(subjectText);
             const body = encodeURIComponent(outputText);
             
             window.location.href = `mailto:docs@gpspilots.co.nz?subject=${subject}&body=${body}`;
